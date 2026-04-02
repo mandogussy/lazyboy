@@ -241,7 +241,8 @@
 
     <div class="loading-state" id="loadingState">
       <div class="spinner"></div>
-      <p>10개 사이트에서 검색 중...</p>
+      <p id="loadingMsg">10개 사이트에서 검색 중...</p>
+      <p id="coldStartMsg" style="font-size:11px;color:#aaa;margin-top:6px;display:none;">첫 검색은 서버 시작으로 30초 정도 걸릴 수 있습니다</p>
     </div>
 
     <section class="results-section" id="resultsSection">
@@ -265,6 +266,30 @@
 </div>
 
 <script>
+// ← Render 배포 후 실제 URL로 교체
+const RENDER_API = "https://lazyboy-api.onrender.com";
+
+// ── 어필리에이트 설정 ──────────────────────────────────────
+// 1. partners.coupang.com 가입 후 파트너스 ID 입력
+// 2. portals.aliexpress.com 가입 후 AFF ID 입력
+const AFFILIATE = {
+  coupang:    "",   // ← 예: "AF1234567"
+  aliexpress: "",   // ← 예: "your_aff_id"
+};
+
+function applyAffiliate(url, platform) {
+  if (!url || url === "#") return url;
+  if (platform === "Coupang" && AFFILIATE.coupang) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}affiliate=coupang&subid=${AFFILIATE.coupang}`;
+  }
+  if (platform === "AliExpress" && AFFILIATE.aliexpress) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}aff_fcid=${AFFILIATE.aliexpress}`;
+  }
+  return url;
+}
+
 let allData = [];
 let st = { platform:"all", filter:"all", subSize:"all", subPrice:"all" };
 
@@ -333,7 +358,7 @@ function render() {
         <div class="price-total">${fmt(x.price + x.shipping)}</div>
         <div class="price-sub">상품 ${fmt(x.price)}</div>
       </div>
-      <div><a class="buy-btn" href="${x.url || "#"}" target="_blank">바로가기</a></div>
+      <div><a class="buy-btn" href="${applyAffiliate(x.url || "#", x.platform)}" target="_blank" rel="noopener">바로가기</a></div>
     </div>`;
   }).join("");
 }
@@ -345,13 +370,29 @@ async function doSearch(query) {
   document.getElementById("searchBtn").disabled = true;
   document.getElementById("searchBtn").textContent = "검색 중...";
 
+  // Show cold-start warning after 5 seconds
+  const coldTimer = setTimeout(() => {
+    document.getElementById("coldStartMsg").style.display = "block";
+  }, 5000);
+
   try {
-    const res  = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(query)}`);
+    const res  = await fetch(`${RENDER_API}/search?q=${encodeURIComponent(query)}`);
+    clearTimeout(coldTimer);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    allData = json.results || [];
+    allData = (json.results && json.results.length > 0) ? json.results : LOCAL_MOCK;
   } catch {
-    allData = LOCAL_MOCK;
+    clearTimeout(coldTimer);
+    // Render API unavailable — try Netlify function
+    try {
+      const res2 = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(query)}`);
+      const json2 = await res2.json();
+      allData = (json2.results && json2.results.length > 0) ? json2.results : LOCAL_MOCK;
+    } catch {
+      allData = LOCAL_MOCK;
+    }
   }
+  document.getElementById("coldStartMsg").style.display = "none";
 
   document.getElementById("loadingState").classList.remove("visible");
   const rs = document.getElementById("resultsSection");
