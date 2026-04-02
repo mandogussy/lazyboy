@@ -8,1598 +8,1340 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 
   <style>
     /* ─── Design Tokens ─── */
     :root {
-      --bg:          #F5F0E8;
-      --bg-card:     #FDFAF5;
-      --bg-dark:     #1A1A2E;
-      --text:        #1A1A2E;
-      --text-muted:  #6B6B80;
-      --text-light:  #9999AA;
-      --green:       #00B894;
-      --green-dark:  #009974;
-      --amber:       #FDCB6E;
-      --red:         #FF7675;
-      --ikea-blue:   #0058A3;
-      --border:      rgba(26,26,46,0.10);
-      --shadow-sm:   0 2px 12px rgba(26,26,46,0.06);
-      --shadow-md:   0 8px 32px rgba(26,26,46,0.10);
-      --shadow-lg:   0 20px 60px rgba(26,26,46,0.14);
-      --radius:      16px;
-      --radius-sm:   10px;
-      --transition:  0.35s cubic-bezier(0.22,1,0.36,1);
+      --white:      #FFFFFF;
+      --black:      #000000;
+      --ink:        #111111;
+      --card:       #F4F4F4;
+      --border:     #E8E8E8;
+      --muted:      #888888;
+      --mid:        #444444;
+      --radius-lg:  20px;
+      --radius-md:  14px;
+      --radius-sm:  8px;
+      --radius-pill:100px;
+      --sidebar-w:  220px;
+      --ease:       cubic-bezier(0.22,1,0.36,1);
     }
 
     /* ─── Reset ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; font-size: 16px; }
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--ink);
       line-height: 1.6;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
     img { display: block; max-width: 100%; }
     a { color: inherit; text-decoration: none; }
     button { cursor: pointer; border: none; background: none; font-family: inherit; }
     ul { list-style: none; }
 
-    /* ─── Grain Overlay ─── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-repeat: repeat;
-      background-size: 180px 180px;
+    /* ─── Layout ─── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
     }
 
-    /* ─── Typography ─── */
-    .serif { font-family: 'Playfair Display', Georgia, serif; }
+    /* ─── Sidebar ─── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      z-index: 100;
+      overflow-y: auto;
+    }
 
-    /* ─── Container ─── */
-    .container {
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--ink);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .sidebar-logo-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--mid);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    .sidebar-nav a .nav-icon {
+      font-size: 15px;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .sidebar-footer a:hover {
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    /* ─── Mobile Top Nav ─── */
+    .topnav {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 56px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topnav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .topnav-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--ink);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .topnav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .topnav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--mid);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .topnav-links a:hover {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    /* ─── Main Content ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 40px 48px 80px;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    /* ─── Section spacing ─── */
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ─── Hero Card ─── */
+    .hero-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 48px 52px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      margin-bottom: 64px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mid);
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--ink);
+      border-radius: 50%;
+    }
+
+    .hero-headline {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 52px;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--mid);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 380px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 13px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s var(--ease);
+    }
+
+    .btn-primary:hover {
+      background: var(--black);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--mid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 12px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    /* ─── Hero Phone Mock ─── */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone-mock {
+      width: 220px;
+      background: var(--white);
+      border-radius: 28px;
+      border: 1.5px solid var(--border);
+      padding: 20px 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      position: relative;
+    }
+
+    .phone-mock::before {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 10px;
+      margin: 0 auto 16px;
+    }
+
+    .phone-url-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .phone-url-bar span {
+      color: var(--mid);
+      font-size: 10px;
+    }
+
+    .phone-result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .phone-result-item {
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .phone-result-img {
       width: 100%;
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 24px;
+      aspect-ratio: 1;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-result-img-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .phone-result-info {
+      padding: 6px 8px 8px;
+    }
+
+    .phone-result-source {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+
+    .phone-result-name {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    /* ─── Sources chips ─── */
+    .sources-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .source-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .source-chip:hover {
+      border-color: var(--mid);
+      background: var(--white);
+    }
+
+    .source-chip-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .source-chip-body {}
+
+    .source-chip-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .source-chip-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ─── Steps ─── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      position: relative;
+    }
+
+    .step-number {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 48px;
+      font-weight: 400;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-icon {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 20px;
+    }
+
+    /* ─── Demo section ─── */
+    .demo-input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .demo-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .demo-input::placeholder {
+      color: var(--muted);
+    }
+
+    .demo-input:focus {
+      border-color: var(--black);
+    }
+
+    .demo-results {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+      cursor: pointer;
+    }
+
+    .result-card:hover {
+      border-color: var(--mid);
+      transform: translateY(-3px);
+    }
+
+    .result-card-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-card-body {
+      padding: 14px 14px 16px;
+    }
+
+    .result-card-source {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .result-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .result-card-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .result-card-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .score-bar {
+      display: inline-block;
+      width: 40px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--ink);
+      border-radius: 10px;
+    }
+
+    /* ─── Features ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: border-color 0.15s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--mid);
+    }
+
+    .feature-card.dark {
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card.dark .feature-title {
+      color: var(--white);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .feature-card.dark .feature-desc {
+      color: #888888;
+    }
+
+    /* ─── Stats bar ─── */
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 64px;
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 24px 20px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-num {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-left {}
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .footer-brand-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--ink);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--mid);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .footer-links a:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--white);
     }
 
     /* ─── Scroll Reveal ─── */
     .reveal {
       opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+      transform: translateY(20px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
     }
+
     .reveal.visible {
       opacity: 1;
-      transform: translateY(0);
-    }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-
-    /* ═══════════════════════════════
-       NAVBAR
-    ═══════════════════════════════ */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(245,240,232,0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      padding: 0;
-    }
-    .navbar-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-    }
-    .navbar-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.01em;
-      color: var(--text);
-    }
-    .navbar-logo .pin-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--text);
-      color: var(--bg);
-      font-size: 1rem;
-    }
-    .navbar-logo span.brand-accent {
-      color: var(--green);
-    }
-    .navbar-cta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .btn-nav {
-      padding: 9px 20px;
-      border-radius: 40px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.875rem;
-      background: var(--text);
-      color: var(--bg);
-      transition: var(--transition);
-      letter-spacing: 0.01em;
-    }
-    .btn-nav:hover {
-      background: var(--green);
-      transform: translateY(-1px);
+      transform: none;
     }
 
-    /* ═══════════════════════════════
-       HERO
-    ═══════════════════════════════ */
-    .hero {
-      padding: 100px 0 80px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-    }
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 24px;
-      padding: 6px 14px;
-      border: 1.5px solid var(--green);
-      border-radius: 40px;
-    }
-    .hero-headline {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.5rem, 4vw, 3.75rem);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin-bottom: 24px;
-    }
-    .hero-headline em {
-      font-style: italic;
-      color: var(--green);
-    }
-    .hero-sub {
-      font-size: 1.0625rem;
-      color: var(--text-muted);
-      line-height: 1.7;
-      margin-bottom: 40px;
-      max-width: 440px;
-    }
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 16px 32px;
-      border-radius: 50px;
-      background: var(--text);
-      color: var(--bg);
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--green);
-      transform: translateX(-100%);
-      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
-      z-index: 0;
-    }
-    .btn-primary:hover::after { transform: translateX(0); }
-    .btn-primary span { position: relative; z-index: 1; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+    .reveal-delay-6 { transition-delay: 0.48s; }
 
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9375rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      transition: var(--transition);
-      padding: 4px 0;
-      border-bottom: 1.5px solid transparent;
-    }
-    .btn-ghost:hover {
-      color: var(--text);
-      border-bottom-color: var(--text);
-    }
-
-    /* Hero Visual (right side mock) */
-    .hero-visual {
-      position: relative;
-    }
-    .hero-mock-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
-      padding: 28px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-mock-card::before {
-      content: '';
-      position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      background: var(--green);
-      opacity: 0.06;
-    }
-    .mock-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-    }
-    .mock-input-icon { font-size: 1.125rem; }
-    .mock-input-text {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .mock-analyze-btn {
-      padding: 8px 18px;
-      border-radius: 8px;
-      background: var(--green);
-      color: white;
-      font-weight: 700;
-      font-size: 0.8125rem;
-      white-space: nowrap;
-      transition: var(--transition);
-    }
-    .mock-results-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-light);
-      margin-bottom: 14px;
-    }
-    .mock-mini-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .mini-card {
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      border: 1px solid var(--border);
-    }
-    .mini-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .mini-source-badge {
-      font-size: 0.6875rem;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      color: white;
-    }
-    .badge-ikea { background: var(--ikea-blue); }
-    .badge-oh { background: #E74C3C; }
-    .badge-ali { background: #FF6600; }
-    .badge-temu { background: #6C5CE7; }
-
-    .tier-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
-      font-size: 0.625rem;
-      font-weight: 800;
-      color: white;
-    }
-    .tier-a { background: var(--green); }
-    .tier-b { background: var(--amber); color: var(--text); }
-    .tier-c { background: var(--red); }
-
-    .mini-card-img {
-      width: 100%;
-      height: 64px;
-      border-radius: 6px;
-      background: linear-gradient(135deg, #e8e3d8, #d4cfc4);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-    .mini-card-name {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-      line-height: 1.3;
-    }
-    .mini-card-price {
-      font-size: 0.8125rem;
-      font-weight: 700;
-      color: var(--green);
-    }
-
-    /* Floating badge */
-    .float-badge {
-      position: absolute;
-      bottom: -16px;
-      left: 24px;
-      background: white;
-      border-radius: 12px;
-      padding: 10px 16px;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-    }
-    .float-badge .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease infinite;
-    }
+    /* ─── Pulse dot animation ─── */
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.3); }
+      50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* Stats row below hero */
-    .hero-stats {
-      display: flex;
-      align-items: center;
-      gap: 40px;
-      margin-top: 56px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .stat-item { display: flex; flex-direction: column; gap: 4px; }
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.875rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
-    .stat-label { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
-    .stat-divider { width: 1px; height: 40px; background: var(--border); }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
 
-    /* ═══════════════════════════════
-       SOURCES STRIP
-    ═══════════════════════════════ */
-    .sources-strip {
-      padding: 32px 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .sources-inner {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .source-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-light);
-      margin-right: 16px;
-    }
-    .source-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 20px;
-      border-radius: 40px;
-      border: 1.5px solid var(--border);
-      background: var(--bg-card);
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text);
-      transition: var(--transition);
-      cursor: default;
-    }
-    .source-chip:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-      border-color: transparent;
-    }
-    .source-chip.chip-ikea:hover { background: #EBF3FF; border-color: var(--ikea-blue); color: var(--ikea-blue); }
-    .source-chip.chip-oh:hover   { background: #FFECEB; border-color: #E74C3C; color: #E74C3C; }
-    .source-chip.chip-ali:hover  { background: #FFF0E6; border-color: #FF6600; color: #FF6600; }
-    .source-chip.chip-temu:hover { background: #F0EDFF; border-color: #6C5CE7; color: #6C5CE7; }
-
-    /* ═══════════════════════════════
-       HOW IT WORKS
-    ═══════════════════════════════ */
-    .section {
-      padding: 96px 0;
-    }
-    .section-eyebrow {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--green);
-      margin-bottom: 16px;
-    }
-    .section-headline {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2rem, 3.5vw, 2.875rem);
-      font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 1.0625rem;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 520px;
-    }
-    .section-header {
-      margin-bottom: 56px;
+    /* ─── Shimmer for demo state ─── */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
     }
 
-    /* Steps */
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      background: var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .step-card {
-      background: var(--bg-card);
-      padding: 40px 36px;
-      position: relative;
-      transition: var(--transition);
-    }
-    .step-card:hover {
-      background: white;
-    }
-    .step-number {
-      font-family: 'Playfair Display', serif;
-      font-size: 5rem;
-      font-weight: 900;
-      line-height: 1;
-      color: var(--text);
-      opacity: 0.06;
-      position: absolute;
-      top: 24px;
-      right: 28px;
-      letter-spacing: -0.04em;
-    }
-    .step-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: var(--radius-sm);
-      background: var(--text);
-      color: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.375rem;
-      margin-bottom: 24px;
-    }
-    .step-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.375rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 12px;
-      letter-spacing: -0.01em;
-    }
-    .step-desc {
-      font-size: 0.9375rem;
-      color: var(--text-muted);
-      line-height: 1.65;
-    }
-    .step-tag {
-      display: inline-block;
-      margin-top: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--green);
-      padding: 4px 10px;
-      background: rgba(0,184,148,0.1);
-      border-radius: 4px;
+    .shimmer {
+      background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite;
     }
 
-    /* ═══════════════════════════════
-       DEMO SECTION
-    ═══════════════════════════════ */
-    .demo-section {
-      padding: 96px 0;
-      background: var(--text);
-      position: relative;
-      overflow: hidden;
-    }
-    .demo-section::before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      right: -80px;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: var(--green);
-      opacity: 0.05;
-    }
-    .demo-section::after {
-      content: '';
-      position: absolute;
-      bottom: -60px;
-      left: -60px;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: var(--ikea-blue);
-      opacity: 0.05;
-    }
-    .demo-section .section-eyebrow { color: var(--green); }
-    .demo-section .section-headline { color: white; }
-    .demo-section .section-sub { color: rgba(255,255,255,0.6); }
-
-    /* Input Row */
-    .demo-input-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 40px;
-      position: relative;
-      z-index: 1;
-    }
-    .demo-input {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid rgba(255,255,255,0.15);
-      border-radius: 14px;
-      padding: 16px 20px;
-      color: white;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.9375rem;
-      transition: var(--transition);
-    }
-    .demo-input:focus-within {
-      border-color: var(--green);
-      background: rgba(255,255,255,0.10);
-    }
-    .demo-input input {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      color: white;
-      font-family: inherit;
-      font-size: inherit;
-    }
-    .demo-input input::placeholder { color: rgba(255,255,255,0.4); }
-    .demo-submit {
-      padding: 16px 28px;
-      border-radius: 14px;
-      background: var(--green);
-      color: white;
-      font-weight: 700;
-      font-size: 0.9375rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: var(--transition);
-      white-space: nowrap;
-    }
-    .demo-submit:hover {
-      background: var(--green-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(0,184,148,0.35);
-    }
-
-    /* Results grid */
-    .results-label-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 1;
-    }
-    .results-label {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.45);
-    }
-    .results-count {
-      font-size: 0.8125rem;
-      font-weight: 600;
-      color: var(--green);
-    }
-
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      position: relative;
-      z-index: 1;
-    }
-    .result-card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-    .result-card:hover {
-      background: rgba(255,255,255,0.10);
-      border-color: rgba(255,255,255,0.20);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
-    }
-    .card-img {
-      width: 100%;
-      height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      position: relative;
-    }
-    .card-img-ikea   { background: linear-gradient(135deg, #0058A310, #0058A320); }
-    .card-img-oh     { background: linear-gradient(135deg, #E74C3C10, #E74C3C20); }
-    .card-img-ali    { background: linear-gradient(135deg, #FF660010, #FF660020); }
-    .card-img-temu   { background: linear-gradient(135deg, #6C5CE710, #6C5CE720); }
-
-    .card-source-tag {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      font-size: 0.6875rem;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-      color: white;
-      letter-spacing: 0.04em;
-    }
-    .card-tier-tag {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6875rem;
-      font-weight: 800;
-      color: white;
-    }
-
-    .card-body {
-      padding: 16px;
-    }
-    .card-name {
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: white;
-      line-height: 1.35;
-      margin-bottom: 4px;
-    }
-    .card-name-ko {
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 12px;
-    }
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-price {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--green);
-    }
-    .card-similarity {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.5);
-    }
-    .similarity-bar {
-      width: 40px;
-      height: 4px;
-      border-radius: 2px;
-      background: rgba(255,255,255,0.1);
-      overflow: hidden;
-    }
-    .similarity-fill {
-      height: 100%;
-      border-radius: 2px;
-      background: var(--green);
-    }
-
-    /* Price tier legend */
-    .tier-legend {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-top: 24px;
-      padding: 16px 20px;
-      background: rgba(255,255,255,0.04);
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255,255,255,0.08);
-      position: relative;
-      z-index: 1;
-      flex-wrap: wrap;
-    }
-    .tier-legend-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-      margin-right: 4px;
-    }
-    .tier-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .tier-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-    }
-    .tier-item-label {
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: rgba(255,255,255,0.6);
-    }
-
-    /* ═══════════════════════════════
-       FEATURES
-    ═══════════════════════════════ */
-    .features-section {
-      padding: 96px 0;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2px;
-      background: var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .feature-card {
-      background: var(--bg-card);
-      padding: 36px 32px;
-      transition: var(--transition);
-    }
-    .feature-card:hover {
-      background: white;
-      transform: scale(1.01);
-      box-shadow: var(--shadow-md);
-      z-index: 2;
-    }
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      display: block;
-    }
-    .feature-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 10px;
-      letter-spacing: -0.01em;
-    }
-    .feature-desc {
-      font-size: 0.9375rem;
-      color: var(--text-muted);
-      line-height: 1.65;
-    }
-    .feature-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 16px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--green);
-      border-bottom: 1.5px solid transparent;
-      transition: var(--transition);
-      padding-bottom: 2px;
-    }
-    .feature-link:hover {
-      border-bottom-color: var(--green);
-    }
-
-    /* ═══════════════════════════════
-       MARQUEE STRIP
-    ═══════════════════════════════ */
-    .marquee-section {
-      padding: 28px 0;
-      overflow: hidden;
-      border-top: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    .marquee-track {
-      display: flex;
-      gap: 40px;
-      animation: marquee 28s linear infinite;
-      white-space: nowrap;
-      width: max-content;
-    }
-    .marquee-track:hover { animation-play-state: paused; }
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-    .marquee-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-    .marquee-item strong { color: var(--text); font-weight: 700; }
-    .marquee-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--border);
-    }
-
-    /* ═══════════════════════════════
-       FOOTER
-    ═══════════════════════════════ */
-    .footer {
-      background: var(--text);
-      color: rgba(255,255,255,0.6);
-      padding: 64px 0 40px;
-    }
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 64px;
-      margin-bottom: 48px;
-    }
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.25rem;
-      color: white;
-      margin-bottom: 16px;
-    }
-    .footer-logo-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-    .footer-tagline {
-      font-size: 0.9375rem;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.5);
-      max-width: 280px;
-      margin-bottom: 24px;
-    }
-    .footer-github {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.8);
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-    .footer-github:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.3);
-      color: white;
-    }
-    .footer-col-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-      margin-bottom: 20px;
-    }
-    .footer-links {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .footer-link {
-      font-size: 0.9375rem;
-      color: rgba(255,255,255,0.55);
-      transition: color 0.2s;
-    }
-    .footer-link:hover { color: white; }
-    .footer-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 28px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .footer-copy {
-      font-size: 0.875rem;
-      color: rgba(255,255,255,0.35);
-    }
-    .footer-built {
-      font-size: 0.8125rem;
-      color: rgba(255,255,255,0.3);
-    }
-
-    /* ═══════════════════════════════
-       RESPONSIVE
-    ═══════════════════════════════ */
-    @media (max-width: 1024px) {
-      .results-grid { grid-template-columns: repeat(2, 1fr); }
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .hero-grid {
-        grid-template-columns: 1fr;
-        gap: 48px;
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .topnav { display: flex; }
+      .main {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 24px 20px 60px;
       }
-      .hero { padding: 64px 0 56px; }
+      .hero-card {
+        grid-template-columns: 1fr;
+        padding: 32px 28px;
+      }
+      .hero-visual { display: none; }
+      .hero-headline { font-size: 38px; }
       .steps-grid { grid-template-columns: 1fr; }
-      .results-grid { grid-template-columns: 1fr 1fr; }
+      .demo-results { grid-template-columns: repeat(2, 1fr); }
       .features-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr; gap: 40px; }
-      .hero-stats { gap: 24px; }
-      .stat-divider { display: none; }
-      .demo-input-row { flex-direction: column; }
+      .stats-bar { flex-wrap: wrap; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
     }
-    @media (max-width: 480px) {
-      .results-grid { grid-template-columns: 1fr; }
-      .hero-actions { flex-direction: column; align-items: flex-start; }
-      .sources-inner { gap: 8px; }
-      .navbar-cta .btn-nav { display: none; }
+
+    @media (max-width: 600px) {
+      .hero-headline { font-size: 30px; }
+      .demo-results { grid-template-columns: 1fr 1fr; }
+      .sources-grid { gap: 8px; }
+      .source-chip { padding: 10px 14px; }
+      .footer { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 420px) {
+      .demo-results { grid-template-columns: 1fr; }
+      .topnav-links a { font-size: 12px; padding: 5px 8px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══════ NAVBAR ═══════ -->
-  <nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="container">
-      <div class="navbar-inner">
-        <a href="/" class="navbar-logo" aria-label="Pinter-Match AI 홈으로">
-          <div class="pin-icon" aria-hidden="true">📌</div>
-          Pinter-Match <span class="brand-accent">AI</span>
-        </a>
-        <div class="navbar-cta">
-          <a href="https://github.com/mandogussy/lazyboy" target="_blank" rel="noopener" class="btn-nav">
-            GitHub 보기
+  <!-- ─── Sidebar (desktop) ─── -->
+  <aside class="sidebar" role="navigation" aria-label="메인 네비게이션">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">📌</div>
+      <div>
+        <div class="sidebar-logo-text">Pinter-Match</div>
+        <div class="sidebar-logo-sub">AI 소싱 플랫폼</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">메뉴</div>
+      <a href="#home" class="active">
+        <span class="nav-icon">◻</span> Home
+      </a>
+      <a href="#howto">
+        <span class="nav-icon">◎</span> 사용법
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">◈</span> 소스
+      </a>
+      <a href="#demo">
+        <span class="nav-icon">◷</span> 데모
+      </a>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-label">소스</div>
+      <a href="#sources">
+        <span class="nav-icon">🪑</span> IKEA
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">🏠</span> 오늘의집
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">📦</span> AliExpress
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">🛒</span> Temu
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="https://github.com" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── Top Nav (mobile) ─── -->
+  <header class="topnav" role="navigation" aria-label="모바일 네비게이션">
+    <div class="topnav-logo">
+      <div class="topnav-logo-icon">📌</div>
+      Pinter-Match
+    </div>
+    <nav class="topnav-links">
+      <a href="#home">홈</a>
+      <a href="#howto">사용법</a>
+      <a href="#demo">데모</a>
+    </nav>
+  </header>
+
+  <!-- ─── Main Content ─── -->
+  <main class="main" id="home">
+
+    <!-- Hero -->
+    <div class="hero-card reveal" id="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot pulse"></span>
+          AI 인테리어 소싱
+        </div>
+        <h1 class="hero-headline">
+          인테리어 레퍼런스를<br>
+          <em>제품으로.</em>
+        </h1>
+        <p class="hero-sub">
+          Pinterest URL 하나면 충분합니다. AI가 IKEA, 오늘의집, AliExpress, Temu에서 똑같이 생긴 제품을 찾아드립니다.
+        </p>
+        <div class="hero-actions">
+          <a href="#demo" class="btn-primary">
+            지금 시작하기
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
+          <a href="#howto" class="btn-ghost">사용 방법 보기</a>
         </div>
       </div>
-    </div>
-  </nav>
 
-  <!-- ═══════ HERO ═══════ -->
-  <section class="hero" aria-label="메인 소개">
-    <div class="container">
-      <div class="hero-grid">
-
-        <!-- Left: Copy -->
-        <div class="hero-copy">
-          <div class="hero-eyebrow reveal">
-            <span>✦</span>
-            AI-Powered Interior Sourcing
+      <!-- Phone mock -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="phone-mock">
+          <div class="phone-url-bar">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>pinterest.com/pin/…</span>
           </div>
-          <h1 class="hero-headline reveal reveal-delay-1">
-            핀터레스트 속<br/>
-            그 제품,<br/>
-            <em>지금 바로 찾아드려요</em>
-          </h1>
-          <p class="hero-sub reveal reveal-delay-2">
-            Pinterest URL 하나만 붙여넣으세요. AI가 이미지를 분석해 IKEA, 오늘의집, AliExpress, Temu에서 가장 비슷한 인테리어 제품을 가격 순으로 찾아드립니다.
-          </p>
-          <div class="hero-actions reveal reveal-delay-3">
-            <a href="#demo" class="btn-primary" aria-label="지금 시작하기">
-              <span>지금 시작하기</span>
-              <span aria-hidden="true">→</span>
-            </a>
-            <a href="#how" class="btn-ghost">
-              작동 방법 보기 <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-
-          <div class="hero-stats reveal reveal-delay-4">
-            <div class="stat-item">
-              <span class="stat-num">4곳</span>
-              <span class="stat-label">동시 검색 소스</span>
-            </div>
-            <div class="stat-divider" aria-hidden="true"></div>
-            <div class="stat-item">
-              <span class="stat-num">3단계</span>
-              <span class="stat-label">간단한 프로세스</span>
-            </div>
-            <div class="stat-divider" aria-hidden="true"></div>
-            <div class="stat-item">
-              <span class="stat-num">AI 매칭</span>
-              <span class="stat-label">비주얼 유사도 분석</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Mock UI -->
-        <div class="hero-visual reveal reveal-delay-2">
-          <div class="hero-mock-card" role="img" aria-label="서비스 UI 미리보기">
-            <div class="mock-input-wrapper">
-              <span class="mock-input-icon" aria-hidden="true">📌</span>
-              <span class="mock-input-text">https://pinterest.com/pin/nordic-living-room-oak-shelf...</span>
-              <button class="mock-analyze-btn" aria-label="분석 시작">분석하기</button>
-            </div>
-            <div class="mock-results-label">AI 매칭 결과</div>
-            <div class="mock-mini-cards">
-              <div class="mini-card">
-                <div class="mini-card-header">
-                  <span class="mini-source-badge badge-ikea">IKEA</span>
-                  <span class="tier-badge tier-a" aria-label="A등급">A</span>
-                </div>
-                <div class="mini-card-img" aria-hidden="true">🪑</div>
-                <div class="mini-card-name">KALLAX 셸프 유닛</div>
-                <div class="mini-card-price">₩89,900</div>
+          <div class="phone-result-grid">
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🪑</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">IKEA</div>
+                <div class="phone-result-name">POÄNG 암체어</div>
               </div>
-              <div class="mini-card">
-                <div class="mini-card-header">
-                  <span class="mini-source-badge badge-oh">오늘의집</span>
-                  <span class="tier-badge tier-a" aria-label="A등급">A</span>
-                </div>
-                <div class="mini-card-img" aria-hidden="true">🛋️</div>
-                <div class="mini-card-name">북유럽 오픈 선반</div>
-                <div class="mini-card-price">₩124,000</div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🛋️</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">오늘의집</div>
+                <div class="phone-result-name">원목 라운지 체어</div>
               </div>
-              <div class="mini-card">
-                <div class="mini-card-header">
-                  <span class="mini-source-badge badge-ali">AliExpress</span>
-                  <span class="tier-badge tier-b" aria-label="B등급">B</span>
-                </div>
-                <div class="mini-card-img" aria-hidden="true">📦</div>
-                <div class="mini-card-name">Nordic Wood Shelf</div>
-                <div class="mini-card-price">₩31,200</div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🪴</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">AliExpress</div>
+                <div class="phone-result-name">북유럽 의자</div>
               </div>
-              <div class="mini-card">
-                <div class="mini-card-header">
-                  <span class="mini-source-badge badge-temu">Temu</span>
-                  <span class="tier-badge tier-c" aria-label="C등급">C</span>
-                </div>
-                <div class="mini-card-img" aria-hidden="true">🛒</div>
-                <div class="mini-card-name">Bookshelf Storage</div>
-                <div class="mini-card-price">₩18,500</div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">💡</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">Temu</div>
+                <div class="phone-result-name">모던 스탠드</div>
               </div>
             </div>
           </div>
-          <div class="float-badge" aria-label="실시간 분석 완료">
-            <div class="dot" aria-hidden="true"></div>
-            AI 분석 완료 — 4개 소스 매칭됨
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar reveal">
+      <div class="stat-item">
+        <div class="stat-num">4개</div>
+        <div class="stat-label">지원 쇼핑몰</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">1초</div>
+        <div class="stat-label">분석 시간</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">비전 매칭</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">무료</div>
+        <div class="stat-label">지금 베타</div>
+      </div>
+    </div>
+
+    <!-- Sources section -->
+    <section class="section" id="sources">
+      <div class="section-label reveal">지원 소스</div>
+      <h2 class="section-title reveal">4개 플랫폼에서 동시에 검색</h2>
+      <p class="section-sub reveal">국내외 주요 인테리어 쇼핑몰에서 유사 제품을 한 번에 찾아드립니다.</p>
+      <div class="sources-grid">
+        <div class="source-chip reveal reveal-delay-1">
+          <div class="source-chip-icon">🪑</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">IKEA</div>
+            <div class="source-chip-desc">스웨덴 가구 & 홈데코</div>
           </div>
         </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════ SOURCES STRIP ═══════ -->
-  <div class="sources-strip" aria-label="지원 쇼핑몰">
-    <div class="container">
-      <div class="sources-inner">
-        <span class="source-label">지원 소스</span>
-        <div class="source-chip chip-ikea reveal" role="img" aria-label="IKEA">
-          🇸🇪 <strong>IKEA</strong>
+        <div class="source-chip reveal reveal-delay-2">
+          <div class="source-chip-icon">🏠</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">오늘의집</div>
+            <div class="source-chip-desc">국내 인테리어 커머스</div>
+          </div>
         </div>
-        <div class="source-chip chip-oh reveal reveal-delay-1" role="img" aria-label="오늘의집">
-          🏠 <strong>오늘의집</strong>
+        <div class="source-chip reveal reveal-delay-3">
+          <div class="source-chip-icon">📦</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">AliExpress</div>
+            <div class="source-chip-desc">글로벌 소싱 마켓</div>
+          </div>
         </div>
-        <div class="source-chip chip-ali reveal reveal-delay-2" role="img" aria-label="AliExpress">
-          🌏 <strong>AliExpress</strong>
-        </div>
-        <div class="source-chip chip-temu reveal reveal-delay-3" role="img" aria-label="Temu">
-          📦 <strong>Temu</strong>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════ HOW IT WORKS ═══════ -->
-  <section class="section" id="how" aria-label="작동 방법">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow reveal">How It Works</div>
-        <h2 class="section-headline reveal reveal-delay-1">단 3단계로<br/>완성되는 소싱</h2>
-        <p class="section-sub reveal reveal-delay-2">
-          복잡한 과정 없이 URL 하나로 시작하세요. AI가 나머지를 처리합니다.
-        </p>
-      </div>
-
-      <div class="steps-grid" role="list">
-        <div class="step-card reveal" role="listitem">
-          <span class="step-number" aria-hidden="true">01</span>
-          <div class="step-icon" aria-hidden="true">📌</div>
-          <h3 class="step-title">URL 붙여넣기</h3>
-          <p class="step-desc">
-            마음에 드는 Pinterest 핀의 URL을 복사해서 입력창에 붙여넣으세요. 어떤 인테리어 스타일이든 가능합니다.
-          </p>
-          <span class="step-tag">Paste URL</span>
-        </div>
-        <div class="step-card reveal reveal-delay-1" role="listitem">
-          <span class="step-number" aria-hidden="true">02</span>
-          <div class="step-icon" aria-hidden="true" style="background: var(--green);">🤖</div>
-          <h3 class="step-title">AI 비주얼 분석</h3>
-          <p class="step-desc">
-            AI가 핀터레스트 이미지에서 제품의 형태, 색상, 스타일을 추출하고 4개 소스에서 동시에 유사 제품을 탐색합니다.
-          </p>
-          <span class="step-tag">AI Matching</span>
-        </div>
-        <div class="step-card reveal reveal-delay-2" role="listitem">
-          <span class="step-number" aria-hidden="true">03</span>
-          <div class="step-icon" aria-hidden="true" style="background: var(--ikea-blue);">✅</div>
-          <h3 class="step-title">결과 확인 & 구매</h3>
-          <p class="step-desc">
-            가격 등급(A/B/C)으로 정리된 결과를 비교하고, 원하는 제품 링크로 바로 이동해 구매하세요.
-          </p>
-          <span class="step-tag">Compare & Buy</span>
+        <div class="source-chip reveal reveal-delay-4">
+          <div class="source-chip-icon">🛒</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">Temu</div>
+            <div class="source-chip-desc">초저가 글로벌 쇼핑</div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ═══════ DEMO SECTION ═══════ -->
-  <section class="demo-section" id="demo" aria-label="라이브 데모">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow reveal">Demo</div>
-        <h2 class="section-headline reveal reveal-delay-1">결과가<br/>이렇게 나옵니다</h2>
-        <p class="section-sub reveal reveal-delay-2">
-          실제 검색 결과 화면입니다. Pinterest URL을 입력하면 아래처럼 4개 소스에서 매칭 결과를 보여줍니다.
-        </p>
+    <!-- How to section -->
+    <section class="section" id="howto">
+      <div class="section-label reveal">사용 방법</div>
+      <h2 class="section-title reveal">3단계로 끝납니다</h2>
+      <p class="section-sub reveal">복잡한 과정 없이 Pinterest URL 하나로 시작하세요.</p>
+      <div class="steps-grid">
+        <div class="step-card reveal reveal-delay-1">
+          <div class="step-number">01</div>
+          <span class="step-icon">🔗</span>
+          <div class="step-title">URL 복사</div>
+          <div class="step-desc">Pinterest에서 마음에 드는 인테리어 사진의 URL을 복사합니다. 어떤 핀이든 괜찮습니다.</div>
+        </div>
+        <div class="step-card reveal reveal-delay-2">
+          <div class="step-number">02</div>
+          <span class="step-icon">🤖</span>
+          <div class="step-title">AI 분석</div>
+          <div class="step-desc">AI가 사진에서 가구, 조명, 소품 등 주요 제품을 자동으로 인식하고 시각 특징을 추출합니다.</div>
+        </div>
+        <div class="step-card reveal reveal-delay-3">
+          <div class="step-number">03</div>
+          <span class="step-icon">🛍️</span>
+          <div class="step-title">제품 발견</div>
+          <div class="step-desc">4개 플랫폼에서 유사한 제품을 가격 비교와 함께 보여드립니다. 바로 구매 링크로 이동하세요.</div>
+        </div>
       </div>
+    </section>
 
-      <!-- Input Row -->
-      <div class="demo-input-row reveal">
-        <label class="demo-input" for="demo-url-input" aria-label="Pinterest URL 입력">
-          <span aria-hidden="true">📌</span>
-          <input
-            id="demo-url-input"
-            type="url"
-            placeholder="https://pinterest.com/pin/... 을 여기에 붙여넣으세요"
-            aria-label="Pinterest URL"
-            readonly
-            value="https://pinterest.com/pin/oak-mid-century-chair-746291038/"
-          />
-        </label>
-        <button class="demo-submit" aria-label="AI 분석 시작">
-          <span>분석 시작</span>
-          <span aria-hidden="true">→</span>
+    <!-- Demo section -->
+    <section class="section" id="demo">
+      <div class="section-label reveal">데모</div>
+      <h2 class="section-title reveal">직접 해보세요</h2>
+      <p class="section-sub reveal">Pinterest URL을 붙여넣고 검색 버튼을 눌러보세요.</p>
+
+      <div class="demo-input-wrap reveal">
+        <input
+          type="url"
+          class="demo-input"
+          id="demo-url"
+          placeholder="https://www.pinterest.com/pin/..."
+          aria-label="Pinterest URL 입력"
+        />
+        <button class="btn-primary" id="demo-btn" onclick="runDemo()">
+          검색
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         </button>
       </div>
 
-      <!-- Results -->
-      <div class="results-label-row reveal">
-        <span class="results-label">매칭 결과</span>
-        <span class="results-count">4개 소스 · 유사도 순 정렬</span>
-      </div>
-
-      <div class="results-grid" role="list" aria-label="제품 매칭 결과">
-
-        <!-- IKEA -->
-        <article class="result-card reveal" role="listitem" tabindex="0" aria-label="IKEA 제품">
-          <div class="card-img card-img-ikea">
-            🪑
-            <span class="card-source-tag badge-ikea">IKEA</span>
-            <span class="card-tier-tag tier-a" aria-label="A등급 — 높은 유사도">A</span>
-          </div>
-          <div class="card-body">
-            <div class="card-name">POÄNG Armchair</div>
-            <div class="card-name-ko">포앙 안락의자 — 오크 무늬목</div>
-            <div class="card-footer">
-              <span class="card-price">₩189,000</span>
-              <div class="card-similarity" aria-label="유사도 94%">
-                <div class="similarity-bar"><div class="similarity-fill" style="width:94%"></div></div>
-                94%
-              </div>
+      <div class="demo-results" id="demo-results">
+        <div class="result-card reveal reveal-delay-1">
+          <div class="result-card-img">🪑</div>
+          <div class="result-card-body">
+            <span class="result-card-source">IKEA</span>
+            <div class="result-card-name">POÄNG 암체어, 자작나무/크니사 베이지</div>
+            <div class="result-card-price">₩229,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:92%"></span></span>
+              92%
             </div>
           </div>
-        </article>
-
-        <!-- 오늘의집 -->
-        <article class="result-card reveal reveal-delay-1" role="listitem" tabindex="0" aria-label="오늘의집 제품">
-          <div class="card-img card-img-oh">
-            🛋️
-            <span class="card-source-tag badge-oh">오늘의집</span>
-            <span class="card-tier-tag tier-a" aria-label="A등급 — 높은 유사도">A</span>
-          </div>
-          <div class="card-body">
-            <div class="card-name">미드센추리 패브릭 의자</div>
-            <div class="card-name-ko">Mid-Century Accent Chair</div>
-            <div class="card-footer">
-              <span class="card-price">₩224,000</span>
-              <div class="card-similarity" aria-label="유사도 89%">
-                <div class="similarity-bar"><div class="similarity-fill" style="width:89%"></div></div>
-                89%
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- AliExpress -->
-        <article class="result-card reveal reveal-delay-2" role="listitem" tabindex="0" aria-label="AliExpress 제품">
-          <div class="card-img card-img-ali">
-            📦
-            <span class="card-source-tag badge-ali">AliExpress</span>
-            <span class="card-tier-tag tier-b" aria-label="B등급 — 보통 유사도">B</span>
-          </div>
-          <div class="card-body">
-            <div class="card-name">Scandinavian Lounge Chair</div>
-            <div class="card-name-ko">스칸디나비안 라운지 체어</div>
-            <div class="card-footer">
-              <span class="card-price">₩67,400</span>
-              <div class="card-similarity" aria-label="유사도 76%">
-                <div class="similarity-bar"><div class="similarity-fill" style="width:76%"></div></div>
-                76%
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Temu -->
-        <article class="result-card reveal reveal-delay-3" role="listitem" tabindex="0" aria-label="Temu 제품">
-          <div class="card-img card-img-temu">
-            🛒
-            <span class="card-source-tag badge-temu">Temu</span>
-            <span class="card-tier-tag tier-c" aria-label="C등급 — 낮은 유사도">C</span>
-          </div>
-          <div class="card-body">
-            <div class="card-name">Modern Accent Chair</div>
-            <div class="card-name-ko">모던 악센트 의자</div>
-            <div class="card-footer">
-              <span class="card-price">₩29,800</span>
-              <div class="card-similarity" aria-label="유사도 61%">
-                <div class="similarity-bar"><div class="similarity-fill" style="width:61%"></div></div>
-                61%
-              </div>
-            </div>
-          </div>
-        </article>
-
-      </div>
-
-      <!-- Tier Legend -->
-      <div class="tier-legend reveal" role="note" aria-label="등급 설명">
-        <span class="tier-legend-label">가격 등급</span>
-        <div class="tier-item">
-          <div class="tier-dot" style="background: var(--green);" aria-hidden="true"></div>
-          <span class="tier-item-label">A — 높은 유사도 · 합리적 가격</span>
         </div>
-        <div class="tier-item">
-          <div class="tier-dot" style="background: var(--amber);" aria-hidden="true"></div>
-          <span class="tier-item-label">B — 중간 유사도 · 저렴한 대안</span>
+        <div class="result-card reveal reveal-delay-2">
+          <div class="result-card-img">🛋️</div>
+          <div class="result-card-body">
+            <span class="result-card-source">오늘의집</span>
+            <div class="result-card-name">북유럽 원목 라운지 체어 캔버스</div>
+            <div class="result-card-price">₩189,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:85%"></span></span>
+              85%
+            </div>
+          </div>
         </div>
-        <div class="tier-item">
-          <div class="tier-dot" style="background: var(--red);" aria-hidden="true"></div>
-          <span class="tier-item-label">C — 낮은 유사도 · 최저가 옵션</span>
+        <div class="result-card reveal reveal-delay-3">
+          <div class="result-card-img">🪴</div>
+          <div class="result-card-body">
+            <span class="result-card-source">AliExpress</span>
+            <div class="result-card-name">Solid Wood Rocking Chair Nordic Design</div>
+            <div class="result-card-price">₩68,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:79%"></span></span>
+              79%
+            </div>
+          </div>
+        </div>
+        <div class="result-card reveal reveal-delay-4">
+          <div class="result-card-img">💡</div>
+          <div class="result-card-body">
+            <span class="result-card-source">Temu</span>
+            <div class="result-card-name">Minimalist Armchair Beige Linen</div>
+            <div class="result-card-price">₩42,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:73%"></span></span>
+              73%
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ═══════ MARQUEE ═══════ -->
-  <div class="marquee-section" aria-hidden="true">
-    <div class="marquee-track">
-      <span class="marquee-item"><strong>AI 비주얼 매칭</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">Pinterest → IKEA 검색</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>4개 소스 동시 비교</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">인테리어 소싱 자동화</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>가격 A/B/C 등급</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">오늘의집 · AliExpress · Temu</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>Pinter-Match AI</strong></span>
-      <span class="marquee-dot"></span>
-      <!-- Duplicate for seamless loop -->
-      <span class="marquee-item"><strong>AI 비주얼 매칭</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">Pinterest → IKEA 검색</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>4개 소스 동시 비교</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">인테리어 소싱 자동화</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>가격 A/B/C 등급</strong></span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item">오늘의집 · AliExpress · Temu</span>
-      <span class="marquee-dot"></span>
-      <span class="marquee-item"><strong>Pinter-Match AI</strong></span>
-      <span class="marquee-dot"></span>
-    </div>
-  </div>
-
-  <!-- ═══════ FEATURES ═══════ -->
-  <section class="features-section" aria-label="주요 기능">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-eyebrow reveal">Features</div>
-        <h2 class="section-headline reveal reveal-delay-1">왜 Pinter-Match AI인가요?</h2>
-        <p class="section-sub reveal reveal-delay-2">
-          수작업 검색에 쏟던 시간을 되찾아 드립니다. AI가 스타일을 읽고, 가격을 비교하고, 결과를 정리합니다.
-        </p>
-      </div>
-
+    <!-- Features section -->
+    <section class="section" id="features">
+      <div class="section-label reveal">기능</div>
+      <h2 class="section-title reveal">왜 Pinter-Match인가요</h2>
+      <p class="section-sub reveal">단순한 키워드 검색이 아닙니다. 이미지를 이해하는 AI입니다.</p>
       <div class="features-grid">
-        <div class="feature-card reveal" tabindex="0">
-          <span class="feature-icon" role="img" aria-label="AI 매칭">🤖</span>
-          <h3 class="feature-title">AI 비주얼 매칭</h3>
-          <p class="feature-desc">
-            이미지 분석 AI가 색상, 형태, 소재, 스타일을 파악해 실제로 비슷한 제품만 보여줍니다. 키워드 검색의 한계를 넘어섭니다.
-          </p>
-          <span class="feature-link">더 알아보기 →</span>
+        <div class="feature-card dark reveal reveal-delay-1">
+          <div class="feature-icon">👁️</div>
+          <div class="feature-title">비전 AI 매칭</div>
+          <div class="feature-desc">최신 컴퓨터 비전 모델이 색상, 형태, 소재, 스타일을 종합 분석해 가장 유사한 제품을 찾습니다.</div>
         </div>
-
-        <div class="feature-card reveal reveal-delay-1" tabindex="0">
-          <span class="feature-icon" role="img" aria-label="멀티소스 검색">🌐</span>
-          <h3 class="feature-title">멀티소스 검색</h3>
-          <p class="feature-desc">
-            IKEA, 오늘의집, AliExpress, Temu — 4개 플랫폼을 한 번에 검색합니다. 탭을 이리저리 옮기지 않아도 됩니다.
-          </p>
-          <span class="feature-link">더 알아보기 →</span>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">즉시 결과</div>
+          <div class="feature-desc">URL 입력 후 수 초 내에 4개 플랫폼의 검색 결과를 한 화면에 모아드립니다.</div>
         </div>
-
-        <div class="feature-card reveal reveal-delay-2" tabindex="0">
-          <span class="feature-icon" role="img" aria-label="가격비교">💰</span>
-          <h3 class="feature-title">스마트 가격 비교</h3>
-          <p class="feature-desc">
-            동일 스타일의 제품을 A/B/C 등급으로 분류해 예산에 맞는 선택을 도와드립니다. 프리미엄부터 초저가까지 한눈에.
-          </p>
-          <span class="feature-link">더 알아보기 →</span>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">가격 비교</div>
+          <div class="feature-desc">IKEA부터 Temu까지 동일 스타일의 제품을 가격순으로 정렬해 최적의 선택을 도와드립니다.</div>
         </div>
-
-        <div class="feature-card reveal reveal-delay-3" tabindex="0">
-          <span class="feature-icon" role="img" aria-label="빠른 결과">⚡</span>
-          <h3 class="feature-title">빠른 결과</h3>
-          <p class="feature-desc">
-            수십 분 걸리던 소싱 작업이 몇 초로 단축됩니다. URL 하나 붙여넣으면 AI가 즉시 분석을 시작합니다.
-          </p>
-          <span class="feature-link">더 알아보기 →</span>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-title">개인정보 보호</div>
+          <div class="feature-desc">URL만 입력받습니다. 개인정보를 수집하거나 저장하지 않습니다. 로그인도 필요 없습니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-5">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">모든 기기 지원</div>
+          <div class="feature-desc">스마트폰, 태블릿, PC 어디서든 같은 경험을 제공합니다. 별도 앱 설치가 필요 없습니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-6">
+          <div class="feature-icon">🌏</div>
+          <div class="feature-title">국내외 통합</div>
+          <div class="feature-desc">국내 오늘의집과 해외 AliExpress, Temu를 함께 검색해 취향과 예산에 맞는 제품을 찾아드립니다.</div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ═══════ FOOTER ═══════ -->
-  <footer class="footer" aria-label="페이지 하단">
-    <div class="container">
-      <div class="footer-grid">
-        <div>
-          <div class="footer-logo">
-            <div class="footer-logo-icon" aria-hidden="true">📌</div>
-            Pinter-Match AI
-          </div>
-          <p class="footer-tagline">
-            Pinterest에서 발견한 인테리어 영감을 현실로. AI 소싱 플랫폼 Pinter-Match AI.
-          </p>
-          <a
-            href="https://github.com/mandogussy/lazyboy"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="footer-github"
-            aria-label="GitHub 저장소 방문"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
-            GitHub에서 보기
-          </a>
+    <!-- Footer -->
+    <footer class="footer reveal">
+      <div class="footer-left">
+        <div class="footer-brand">
+          <div class="footer-brand-icon">📌</div>
+          Pinter-Match AI
         </div>
-
-        <div>
-          <div class="footer-col-title">플랫폼</div>
-          <ul class="footer-links">
-            <li><a href="#" class="footer-link">IKEA 검색</a></li>
-            <li><a href="#" class="footer-link">오늘의집 검색</a></li>
-            <li><a href="#" class="footer-link">AliExpress 검색</a></li>
-            <li><a href="#" class="footer-link">Temu 검색</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="footer-col-title">프로젝트</div>
-          <ul class="footer-links">
-            <li>
-              <a
-                href="https://github.com/mandogussy/lazyboy"
-                target="_blank"
-                rel="noopener"
-                class="footer-link"
-              >GitHub 저장소</a>
-            </li>
-            <li><a href="#how" class="footer-link">작동 방식</a></li>
-            <li><a href="#demo" class="footer-link">데모 보기</a></li>
-          </ul>
-        </div>
+        <div class="footer-copy">Pinterest URL → 인테리어 제품 소싱 플랫폼 · 2025 Lazyboy</div>
       </div>
-
-      <div class="footer-bottom">
-        <span class="footer-copy">© 2025 Pinter-Match AI. All rights reserved.</span>
-        <span class="footer-built">Pinterest 이미지로 더 똑똑한 인테리어 쇼핑을.</span>
+      <div class="footer-links">
+        <a href="https://github.com" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="mailto:hello@pintermatch.ai">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          문의
+        </a>
       </div>
-    </div>
-  </footer>
+    </footer>
+
+  </main>
 
   <script>
-    // ─── Scroll Reveal (Intersection Observer) ───
-    (function () {
-      const elements = document.querySelectorAll('.reveal');
-      if (!elements.length) return;
+    // ─── Scroll Reveal ───
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
+    revealEls.forEach(el => observer.observe(el));
+
+    // Immediately reveal above-fold elements
+    document.querySelectorAll('.hero-card, .stats-bar').forEach(el => {
+      el.classList.add('visible');
+    });
+
+    // ─── Active nav link on scroll ───
+    const sections = document.querySelectorAll('section[id], .hero-card');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
             }
           });
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-      );
-
-      elements.forEach((el) => observer.observe(el));
-    })();
-
-    // ─── Navbar scroll shadow ───
-    (function () {
-      const navbar = document.querySelector('.navbar');
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > 8) {
-          navbar.style.boxShadow = '0 2px 20px rgba(26,26,46,0.08)';
-        } else {
-          navbar.style.boxShadow = 'none';
         }
-      }, { passive: true });
-    })();
+      });
+    }, { threshold: 0.4 });
 
-    // ─── Demo input interaction ───
-    (function () {
-      const input = document.getElementById('demo-url-input');
-      const btn = document.querySelector('.demo-submit');
-      if (!input || !btn) return;
+    document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
 
-      input.removeAttribute('readonly');
+    // ─── Demo function ───
+    function runDemo() {
+      const input = document.getElementById('demo-url');
+      const btn = document.getElementById('demo-btn');
+      const results = document.getElementById('demo-results');
+      const url = input.value.trim();
 
-      btn.addEventListener('click', function () {
-        const val = input.value.trim();
-        if (!val) {
-          input.focus();
-          input.style.borderColor = 'rgba(255,118,117,0.6)';
-          setTimeout(() => { input.style.borderColor = ''; }, 1500);
-          return;
-        }
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span>분석 중...</span><span aria-hidden="true">⏳</span>';
-        btn.disabled = true;
-        setTimeout(() => {
-          btn.innerHTML = '<span>완료!</span><span aria-hidden="true">✓</span>';
+      if (!url) {
+        input.focus();
+        input.style.borderColor = '#000000';
+        setTimeout(() => input.style.borderColor = '', 600);
+        return;
+      }
+
+      // Loading state
+      btn.textContent = '분석 중…';
+      btn.disabled = true;
+
+      results.querySelectorAll('.result-card').forEach(card => {
+        card.style.opacity = '0.4';
+        card.style.pointerEvents = 'none';
+      });
+
+      setTimeout(() => {
+        // Reset
+        btn.innerHTML = '검색 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+        btn.disabled = false;
+        results.querySelectorAll('.result-card').forEach((card, i) => {
           setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-          }, 2000);
-        }, 1800);
-      });
-    })();
-
-    // ─── Result card keyboard accessibility ───
-    (function () {
-      const cards = document.querySelectorAll('.result-card');
-      cards.forEach((card) => {
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            card.click();
-          }
+            card.style.opacity = '1';
+            card.style.pointerEvents = '';
+            card.classList.add('visible');
+          }, i * 100);
         });
+        input.value = '';
+      }, 1800);
+    }
+
+    // Allow Enter to submit
+    document.getElementById('demo-url').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') runDemo();
+    });
+
+    // ─── Smooth scroll for sidebar links ───
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       });
-    })();
+    });
   </script>
 </body>
 </html>
