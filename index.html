@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pinter-Match AI — 인테리어 AI 소싱 플랫폼</title>
+  <meta name="description" content="Pinterest URL을 붙여넣으면 IKEA, 오늘의집, AliExpress, Temu에서 비슷한 인테리어 제품을 찾아주는 AI 소싱 플랫폼" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --white:      #FFFFFF;
+      --black:      #000000;
+      --ink:        #111111;
+      --card:       #F4F4F4;
+      --border:     #E8E8E8;
+      --muted:      #888888;
+      --mid:        #444444;
+      --radius-lg:  20px;
+      --radius-md:  14px;
+      --radius-sm:  8px;
+      --radius-pill:100px;
+      --sidebar-w:  220px;
+      --ease:       cubic-bezier(0.22,1,0.36,1);
+    }
+
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    ul { list-style: none; }
+
+    /* ─── Layout ─── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--ink);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .sidebar-logo-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--mid);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    .sidebar-nav a .nav-icon {
+      font-size: 15px;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .sidebar-footer a:hover {
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    /* ─── Mobile Top Nav ─── */
+    .topnav {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 56px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topnav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .topnav-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--ink);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .topnav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .topnav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--mid);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .topnav-links a:hover {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    /* ─── Main Content ─── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 40px 48px 80px;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    /* ─── Section spacing ─── */
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ─── Hero Card ─── */
+    .hero-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 48px 52px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      margin-bottom: 64px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mid);
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--ink);
+      border-radius: 50%;
+    }
+
+    .hero-headline {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 52px;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--mid);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      max-width: 380px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--ink);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 13px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s var(--ease);
+    }
+
+    .btn-primary:hover {
+      background: var(--black);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: var(--mid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 12px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    /* ─── Hero Phone Mock ─── */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phone-mock {
+      width: 220px;
+      background: var(--white);
+      border-radius: 28px;
+      border: 1.5px solid var(--border);
+      padding: 20px 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      position: relative;
+    }
+
+    .phone-mock::before {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 10px;
+      margin: 0 auto 16px;
+    }
+
+    .phone-url-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .phone-url-bar span {
+      color: var(--mid);
+      font-size: 10px;
+    }
+
+    .phone-result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .phone-result-item {
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .phone-result-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-result-img-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .phone-result-info {
+      padding: 6px 8px 8px;
+    }
+
+    .phone-result-source {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+
+    .phone-result-name {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    /* ─── Sources chips ─── */
+    .sources-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .source-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .source-chip:hover {
+      border-color: var(--mid);
+      background: var(--white);
+    }
+
+    .source-chip-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .source-chip-body {}
+
+    .source-chip-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .source-chip-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ─── Steps ─── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      position: relative;
+    }
+
+    .step-number {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 48px;
+      font-weight: 400;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-icon {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 20px;
+    }
+
+    /* ─── Demo section ─── */
+    .demo-input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .demo-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--white);
+      border: 1.5px solid var(--ink);
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .demo-input::placeholder {
+      color: var(--muted);
+    }
+
+    .demo-input:focus {
+      border-color: var(--black);
+    }
+
+    .demo-results {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+      cursor: pointer;
+    }
+
+    .result-card:hover {
+      border-color: var(--mid);
+      transform: translateY(-3px);
+    }
+
+    .result-card-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-card-body {
+      padding: 14px 14px 16px;
+    }
+
+    .result-card-source {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .result-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .result-card-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .result-card-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .score-bar {
+      display: inline-block;
+      width: 40px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--ink);
+      border-radius: 10px;
+    }
+
+    /* ─── Features ─── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: border-color 0.15s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--mid);
+    }
+
+    .feature-card.dark {
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card.dark .feature-title {
+      color: var(--white);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .feature-card.dark .feature-desc {
+      color: #888888;
+    }
+
+    /* ─── Stats bar ─── */
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 64px;
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 24px 20px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-num {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-left {}
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .footer-brand-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--ink);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--mid);
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .footer-links a:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--white);
+    }
+
+    /* ─── Scroll Reveal ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+    .reveal-delay-6 { transition-delay: 0.48s; }
+
+    /* ─── Pulse dot animation ─── */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    /* ─── Shimmer for demo state ─── */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .topnav { display: flex; }
+      .main {
+        margin-left: 0;
+        max-width: 100%;
+        padding: 24px 20px 60px;
+      }
+      .hero-card {
+        grid-template-columns: 1fr;
+        padding: 32px 28px;
+      }
+      .hero-visual { display: none; }
+      .hero-headline { font-size: 38px; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .demo-results { grid-template-columns: repeat(2, 1fr); }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-bar { flex-wrap: wrap; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+    }
+
+    @media (max-width: 600px) {
+      .hero-headline { font-size: 30px; }
+      .demo-results { grid-template-columns: 1fr 1fr; }
+      .sources-grid { gap: 8px; }
+      .source-chip { padding: 10px 14px; }
+      .footer { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 420px) {
+      .demo-results { grid-template-columns: 1fr; }
+      .topnav-links a { font-size: 12px; padding: 5px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Sidebar (desktop) ─── -->
+  <aside class="sidebar" role="navigation" aria-label="메인 네비게이션">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">📌</div>
+      <div>
+        <div class="sidebar-logo-text">Pinter-Match</div>
+        <div class="sidebar-logo-sub">AI 소싱 플랫폼</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">메뉴</div>
+      <a href="#home" class="active">
+        <span class="nav-icon">◻</span> Home
+      </a>
+      <a href="#howto">
+        <span class="nav-icon">◎</span> 사용법
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">◈</span> 소스
+      </a>
+      <a href="#demo">
+        <span class="nav-icon">◷</span> 데모
+      </a>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-label">소스</div>
+      <a href="#sources">
+        <span class="nav-icon">🪑</span> IKEA
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">🏠</span> 오늘의집
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">📦</span> AliExpress
+      </a>
+      <a href="#sources">
+        <span class="nav-icon">🛒</span> Temu
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="https://github.com" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── Top Nav (mobile) ─── -->
+  <header class="topnav" role="navigation" aria-label="모바일 네비게이션">
+    <div class="topnav-logo">
+      <div class="topnav-logo-icon">📌</div>
+      Pinter-Match
+    </div>
+    <nav class="topnav-links">
+      <a href="#home">홈</a>
+      <a href="#howto">사용법</a>
+      <a href="#demo">데모</a>
+    </nav>
+  </header>
+
+  <!-- ─── Main Content ─── -->
+  <main class="main" id="home">
+
+    <!-- Hero -->
+    <div class="hero-card reveal" id="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot pulse"></span>
+          AI 인테리어 소싱
+        </div>
+        <h1 class="hero-headline">
+          인테리어 레퍼런스를<br>
+          <em>제품으로.</em>
+        </h1>
+        <p class="hero-sub">
+          Pinterest URL 하나면 충분합니다. AI가 IKEA, 오늘의집, AliExpress, Temu에서 똑같이 생긴 제품을 찾아드립니다.
+        </p>
+        <div class="hero-actions">
+          <a href="#demo" class="btn-primary">
+            지금 시작하기
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#howto" class="btn-ghost">사용 방법 보기</a>
+        </div>
+      </div>
+
+      <!-- Phone mock -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="phone-mock">
+          <div class="phone-url-bar">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>pinterest.com/pin/…</span>
+          </div>
+          <div class="phone-result-grid">
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🪑</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">IKEA</div>
+                <div class="phone-result-name">POÄNG 암체어</div>
+              </div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🛋️</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">오늘의집</div>
+                <div class="phone-result-name">원목 라운지 체어</div>
+              </div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">🪴</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">AliExpress</div>
+                <div class="phone-result-name">북유럽 의자</div>
+              </div>
+            </div>
+            <div class="phone-result-item">
+              <div class="phone-result-img"><div class="phone-result-img-inner">💡</div></div>
+              <div class="phone-result-info">
+                <div class="phone-result-source">Temu</div>
+                <div class="phone-result-name">모던 스탠드</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar reveal">
+      <div class="stat-item">
+        <div class="stat-num">4개</div>
+        <div class="stat-label">지원 쇼핑몰</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">1초</div>
+        <div class="stat-label">분석 시간</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">비전 매칭</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">무료</div>
+        <div class="stat-label">지금 베타</div>
+      </div>
+    </div>
+
+    <!-- Sources section -->
+    <section class="section" id="sources">
+      <div class="section-label reveal">지원 소스</div>
+      <h2 class="section-title reveal">4개 플랫폼에서 동시에 검색</h2>
+      <p class="section-sub reveal">국내외 주요 인테리어 쇼핑몰에서 유사 제품을 한 번에 찾아드립니다.</p>
+      <div class="sources-grid">
+        <div class="source-chip reveal reveal-delay-1">
+          <div class="source-chip-icon">🪑</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">IKEA</div>
+            <div class="source-chip-desc">스웨덴 가구 & 홈데코</div>
+          </div>
+        </div>
+        <div class="source-chip reveal reveal-delay-2">
+          <div class="source-chip-icon">🏠</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">오늘의집</div>
+            <div class="source-chip-desc">국내 인테리어 커머스</div>
+          </div>
+        </div>
+        <div class="source-chip reveal reveal-delay-3">
+          <div class="source-chip-icon">📦</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">AliExpress</div>
+            <div class="source-chip-desc">글로벌 소싱 마켓</div>
+          </div>
+        </div>
+        <div class="source-chip reveal reveal-delay-4">
+          <div class="source-chip-icon">🛒</div>
+          <div class="source-chip-body">
+            <div class="source-chip-name">Temu</div>
+            <div class="source-chip-desc">초저가 글로벌 쇼핑</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to section -->
+    <section class="section" id="howto">
+      <div class="section-label reveal">사용 방법</div>
+      <h2 class="section-title reveal">3단계로 끝납니다</h2>
+      <p class="section-sub reveal">복잡한 과정 없이 Pinterest URL 하나로 시작하세요.</p>
+      <div class="steps-grid">
+        <div class="step-card reveal reveal-delay-1">
+          <div class="step-number">01</div>
+          <span class="step-icon">🔗</span>
+          <div class="step-title">URL 복사</div>
+          <div class="step-desc">Pinterest에서 마음에 드는 인테리어 사진의 URL을 복사합니다. 어떤 핀이든 괜찮습니다.</div>
+        </div>
+        <div class="step-card reveal reveal-delay-2">
+          <div class="step-number">02</div>
+          <span class="step-icon">🤖</span>
+          <div class="step-title">AI 분석</div>
+          <div class="step-desc">AI가 사진에서 가구, 조명, 소품 등 주요 제품을 자동으로 인식하고 시각 특징을 추출합니다.</div>
+        </div>
+        <div class="step-card reveal reveal-delay-3">
+          <div class="step-number">03</div>
+          <span class="step-icon">🛍️</span>
+          <div class="step-title">제품 발견</div>
+          <div class="step-desc">4개 플랫폼에서 유사한 제품을 가격 비교와 함께 보여드립니다. 바로 구매 링크로 이동하세요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo section -->
+    <section class="section" id="demo">
+      <div class="section-label reveal">데모</div>
+      <h2 class="section-title reveal">직접 해보세요</h2>
+      <p class="section-sub reveal">Pinterest URL을 붙여넣고 검색 버튼을 눌러보세요.</p>
+
+      <div class="demo-input-wrap reveal">
+        <input
+          type="url"
+          class="demo-input"
+          id="demo-url"
+          placeholder="https://www.pinterest.com/pin/..."
+          aria-label="Pinterest URL 입력"
+        />
+        <button class="btn-primary" id="demo-btn" onclick="runDemo()">
+          검색
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+      </div>
+
+      <div class="demo-results" id="demo-results">
+        <div class="result-card reveal reveal-delay-1">
+          <div class="result-card-img">🪑</div>
+          <div class="result-card-body">
+            <span class="result-card-source">IKEA</span>
+            <div class="result-card-name">POÄNG 암체어, 자작나무/크니사 베이지</div>
+            <div class="result-card-price">₩229,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:92%"></span></span>
+              92%
+            </div>
+          </div>
+        </div>
+        <div class="result-card reveal reveal-delay-2">
+          <div class="result-card-img">🛋️</div>
+          <div class="result-card-body">
+            <span class="result-card-source">오늘의집</span>
+            <div class="result-card-name">북유럽 원목 라운지 체어 캔버스</div>
+            <div class="result-card-price">₩189,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:85%"></span></span>
+              85%
+            </div>
+          </div>
+        </div>
+        <div class="result-card reveal reveal-delay-3">
+          <div class="result-card-img">🪴</div>
+          <div class="result-card-body">
+            <span class="result-card-source">AliExpress</span>
+            <div class="result-card-name">Solid Wood Rocking Chair Nordic Design</div>
+            <div class="result-card-price">₩68,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:79%"></span></span>
+              79%
+            </div>
+          </div>
+        </div>
+        <div class="result-card reveal reveal-delay-4">
+          <div class="result-card-img">💡</div>
+          <div class="result-card-body">
+            <span class="result-card-source">Temu</span>
+            <div class="result-card-name">Minimalist Armchair Beige Linen</div>
+            <div class="result-card-price">₩42,000</div>
+            <div class="result-card-score">
+              유사도
+              <span class="score-bar"><span class="score-fill" style="width:73%"></span></span>
+              73%
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features section -->
+    <section class="section" id="features">
+      <div class="section-label reveal">기능</div>
+      <h2 class="section-title reveal">왜 Pinter-Match인가요</h2>
+      <p class="section-sub reveal">단순한 키워드 검색이 아닙니다. 이미지를 이해하는 AI입니다.</p>
+      <div class="features-grid">
+        <div class="feature-card dark reveal reveal-delay-1">
+          <div class="feature-icon">👁️</div>
+          <div class="feature-title">비전 AI 매칭</div>
+          <div class="feature-desc">최신 컴퓨터 비전 모델이 색상, 형태, 소재, 스타일을 종합 분석해 가장 유사한 제품을 찾습니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">즉시 결과</div>
+          <div class="feature-desc">URL 입력 후 수 초 내에 4개 플랫폼의 검색 결과를 한 화면에 모아드립니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-icon">💰</div>
+          <div class="feature-title">가격 비교</div>
+          <div class="feature-desc">IKEA부터 Temu까지 동일 스타일의 제품을 가격순으로 정렬해 최적의 선택을 도와드립니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-title">개인정보 보호</div>
+          <div class="feature-desc">URL만 입력받습니다. 개인정보를 수집하거나 저장하지 않습니다. 로그인도 필요 없습니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-5">
+          <div class="feature-icon">📱</div>
+          <div class="feature-title">모든 기기 지원</div>
+          <div class="feature-desc">스마트폰, 태블릿, PC 어디서든 같은 경험을 제공합니다. 별도 앱 설치가 필요 없습니다.</div>
+        </div>
+        <div class="feature-card reveal reveal-delay-6">
+          <div class="feature-icon">🌏</div>
+          <div class="feature-title">국내외 통합</div>
+          <div class="feature-desc">국내 오늘의집과 해외 AliExpress, Temu를 함께 검색해 취향과 예산에 맞는 제품을 찾아드립니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer reveal">
+      <div class="footer-left">
+        <div class="footer-brand">
+          <div class="footer-brand-icon">📌</div>
+          Pinter-Match AI
+        </div>
+        <div class="footer-copy">Pinterest URL → 인테리어 제품 소싱 플랫폼 · 2025 Lazyboy</div>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="mailto:hello@pintermatch.ai">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          문의
+        </a>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // ─── Scroll Reveal ───
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    // Immediately reveal above-fold elements
+    document.querySelectorAll('.hero-card, .stats-bar').forEach(el => {
+      el.classList.add('visible');
+    });
+
+    // ─── Active nav link on scroll ───
+    const sections = document.querySelectorAll('section[id], .hero-card');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
+
+    // ─── Demo function ───
+    function runDemo() {
+      const input = document.getElementById('demo-url');
+      const btn = document.getElementById('demo-btn');
+      const results = document.getElementById('demo-results');
+      const url = input.value.trim();
+
+      if (!url) {
+        input.focus();
+        input.style.borderColor = '#000000';
+        setTimeout(() => input.style.borderColor = '', 600);
+        return;
+      }
+
+      // Loading state
+      btn.textContent = '분석 중…';
+      btn.disabled = true;
+
+      results.querySelectorAll('.result-card').forEach(card => {
+        card.style.opacity = '0.4';
+        card.style.pointerEvents = 'none';
+      });
+
+      setTimeout(() => {
+        // Reset
+        btn.innerHTML = '검색 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+        btn.disabled = false;
+        results.querySelectorAll('.result-card').forEach((card, i) => {
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.pointerEvents = '';
+            card.classList.add('visible');
+          }, i * 100);
+        });
+        input.value = '';
+      }, 1800);
+    }
+
+    // Allow Enter to submit
+    document.getElementById('demo-url').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') runDemo();
+    });
+
+    // ─── Smooth scroll for sidebar links ───
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
