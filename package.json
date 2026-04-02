@@ -1,0 +1,7 @@
+{
+  "name": "lazyboy",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-html-parser": "^6.1.13"
+  }
+}

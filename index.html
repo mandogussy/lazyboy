@@ -4,682 +4,415 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lazyboy — 가구 가격 비교</title>
-  <meta name="description" content="IKEA, 오늘의집, AliExpress, Temu 가구 가격을 한 번에 비교하세요." />
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-
   <style>
-    /* ─── Tokens ─── */
-    :root {
-      --bg:          #FFFFFF;
-      --text:        #111111;
-      --text-muted:  #666666;
-      --border:      #E5E5E5;
-      --hover-bg:    #F5F5F5;
-      --sidebar-w:   200px;
-    }
-
-    /* ─── Reset ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
-    body {
-      font-family: 'Pretendard', -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
+    :root {
+      --white:#FFFFFF; --black:#111111; --bg:#F8F8F8;
+      --border:#E5E5E5; --muted:#888; --mid:#444; --chip:#F2F2F2;
+      --radius:10px; --sidebar:200px;
+      --font:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
     }
-    a { color: inherit; text-decoration: none; }
-    button { cursor: pointer; font-family: inherit; }
-    ul { list-style: none; }
+    html,body { height:100%; font-family:var(--font); background:var(--bg); color:var(--black); font-size:14px; line-height:1.5; }
+    .layout { display:flex; min-height:100vh; }
 
-    /* ─── Layout ─── */
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ─── Sidebar ─── */
+    /* Sidebar */
     .sidebar {
-      width: var(--sidebar-w);
-      min-height: 100vh;
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 32px 24px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background: var(--bg);
-      z-index: 100;
+      width:var(--sidebar); background:var(--white); border-right:1px solid var(--border);
+      position:fixed; top:0; left:0; height:100vh;
+      display:flex; flex-direction:column; padding:24px 0; z-index:100;
     }
+    .sidebar-logo { padding:0 20px 24px; border-bottom:1px solid var(--border); }
+    .sidebar-logo h1 { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+    .sidebar-logo span { font-size:11px; color:var(--muted); display:block; margin-top:2px; }
+    .sidebar-nav { padding:16px 0; flex:1; }
+    .nav-item { display:block; padding:10px 20px; font-size:13px; font-weight:500; color:var(--mid); text-decoration:none; cursor:pointer; transition:background .15s,color .15s; }
+    .nav-item:hover,.nav-item.active { background:var(--bg); color:var(--black); }
+    .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); }
+    .sidebar-footer a { font-size:12px; color:var(--muted); text-decoration:none; }
+    .sidebar-footer a:hover { color:var(--black); }
 
-    .sidebar-logo {
-      margin-bottom: 40px;
-    }
+    /* Main */
+    .main { margin-left:var(--sidebar); flex:1; padding:40px 40px 80px; }
 
-    .sidebar-logo h1 {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .sidebar-logo p {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 400;
-      margin-top: 2px;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .sidebar-nav a {
-      display: block;
-      padding: 8px 12px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-      border-radius: 6px;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .sidebar-nav a:hover,
-    .sidebar-nav a.active {
-      background: var(--hover-bg);
-      color: var(--text);
-    }
-
-    /* ─── Main ─── */
-    .main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ─── Top bar (mobile) ─── */
-    .top-bar {
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 90;
-    }
-
-    .top-bar-logo {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    /* ─── Content ─── */
-    .content {
-      padding: 48px 48px 80px;
-      max-width: 960px;
-    }
-
-    /* ─── Search ─── */
-    .search-section {
-      margin-bottom: 32px;
-    }
-
-    .search-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      letter-spacing: 0.01em;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
-
+    /* Hero */
+    .hero { margin-bottom:32px; }
+    .hero h2 { font-size:26px; font-weight:700; letter-spacing:-0.8px; margin-bottom:6px; }
+    .hero p { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    .search-row { display:flex; gap:8px; max-width:640px; }
     .search-input {
-      flex: 1;
-      height: 44px;
-      padding: 0 16px;
-      font-family: 'Pretendard', -apple-system, sans-serif;
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--text);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      outline: none;
-      transition: border-color 0.15s;
+      flex:1; height:44px; border:1px solid var(--border); border-radius:var(--radius);
+      padding:0 16px; font-family:var(--font); font-size:14px;
+      background:var(--white); outline:none; transition:border-color .15s;
     }
-
-    .search-input::placeholder {
-      color: #BBBBBB;
-    }
-
-    .search-input:focus {
-      border-color: #999999;
-    }
-
+    .search-input:focus { border-color:var(--black); }
+    .search-input::placeholder { color:var(--muted); }
     .search-btn {
-      height: 44px;
-      padding: 0 20px;
-      font-family: 'Pretendard', -apple-system, sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      border-radius: 6px;
-      transition: background 0.15s;
-      white-space: nowrap;
+      height:44px; padding:0 22px; background:var(--black); color:var(--white);
+      border:none; border-radius:var(--radius); font-family:var(--font);
+      font-size:14px; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap;
     }
+    .search-btn:hover { background:#333; }
+    .search-btn:disabled { background:#999; cursor:not-allowed; }
 
-    .search-btn:hover {
-      background: #333333;
+    /* Filters */
+    .filter-section { margin-bottom:24px; }
+    .filter-label { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; margin-bottom:10px; }
+    .filter-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .filter-tab {
+      height:34px; padding:0 16px; border:1px solid var(--border); border-radius:100px;
+      background:var(--white); color:var(--mid); font-family:var(--font);
+      font-size:13px; font-weight:500; cursor:pointer; transition:all .15s;
     }
-
-    /* ─── Tabs ─── */
-    .tabs-row {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 0;
+    .filter-tab:hover { border-color:var(--black); color:var(--black); }
+    .filter-tab.active { background:var(--black); border-color:var(--black); color:var(--white); }
+    .sub-filters { display:none; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    .sub-filters.visible { display:flex; }
+    .sub-filter {
+      height:30px; padding:0 14px; border:1px solid var(--border); border-radius:100px;
+      background:var(--chip); color:var(--mid); font-family:var(--font);
+      font-size:12px; font-weight:500; cursor:pointer; transition:all .15s;
     }
+    .sub-filter:hover { border-color:var(--black); color:var(--black); }
+    .sub-filter.active { background:var(--black); border-color:var(--black); color:var(--white); }
 
-    .tab-btn {
-      padding: 10px 16px;
-      font-family: 'Pretendard', -apple-system, sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
+    /* Loading */
+    .loading-state { display:none; padding:60px 0; text-align:center; }
+    .loading-state.visible { display:block; }
+    .spinner { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--black); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-state p { font-size:13px; color:var(--muted); }
+
+    /* Results */
+    .results-section { display:none; animation:fadeUp .2s ease; }
+    .results-section.visible { display:block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .platform-tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:16px; overflow-x:auto; gap:0; }
+    .platform-tab {
+      height:40px; padding:0 14px; border:none; background:none; font-family:var(--font);
+      font-size:13px; font-weight:500; color:var(--muted); cursor:pointer;
+      border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap;
+      transition:color .15s,border-color .15s;
     }
+    .platform-tab:hover { color:var(--black); }
+    .platform-tab.active { color:var(--black); border-bottom-color:var(--black); }
 
-    .tab-btn:hover {
-      color: var(--text);
-    }
+    .results-meta { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .results-meta strong { color:var(--black); }
+    .live-badge { display:inline-block; margin-left:8px; padding:1px 7px; border-radius:100px; font-size:10px; font-weight:600; background:var(--black); color:var(--white); vertical-align:middle; }
 
-    .tab-btn.active {
-      color: var(--text);
-      border-bottom-color: var(--text);
-    }
+    .result-list { display:flex; flex-direction:column; gap:8px; }
 
-    /* ─── Results container ─── */
-    .results-section {
-      margin-top: 0;
-    }
-
-    /* Empty state */
-    .empty-state {
-      padding: 72px 0 40px;
-      text-align: center;
-    }
-
-    .empty-state p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.7;
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
-    /* Results list */
-    .results-list {
-      display: none;
-    }
-
-    .results-list.visible {
-      display: block;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Count line */
-    .results-meta {
-      padding: 14px 0 12px;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
-    }
-
-    /* Table header */
-    .result-header {
-      display: grid;
-      grid-template-columns: 90px 1fr 110px 80px;
-      gap: 16px;
-      align-items: center;
-      padding: 10px 0 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .result-header span {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .result-header span:last-child {
-      text-align: right;
-    }
-
-    .result-header span:nth-child(3) {
-      text-align: right;
-    }
-
-    /* Row */
+    /* Result row: platform | name | shipping | delivery | price | button */
     .result-row {
-      display: grid;
-      grid-template-columns: 90px 1fr 110px 80px;
-      gap: 16px;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.1s;
+      display:grid;
+      grid-template-columns: 100px 1fr 160px 150px 130px 90px;
+      align-items:center; gap:16px;
+      background:var(--white); border:1px solid var(--border);
+      border-radius:var(--radius); padding:14px 20px;
+      transition:background .12s,border-color .12s;
     }
+    .result-row:hover { background:#FAFAFA; border-color:#D0D0D0; }
 
-    .result-row:last-child {
-      border-bottom: none;
+    .platform-badge {
+      display:inline-block; padding:3px 10px; border:1px solid var(--border);
+      border-radius:6px; font-size:11px; font-weight:600; color:var(--mid);
+      background:var(--chip); text-align:center; white-space:nowrap;
     }
+    .platform-badge.live { border-color:var(--black); color:var(--black); background:var(--white); }
 
-    .result-row:hover {
-      background: var(--hover-bg);
-      margin: 0 -12px;
-      padding-left: 12px;
-      padding-right: 12px;
+    .product-name { font-size:14px; font-weight:500; color:var(--black); }
+    .product-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* Shipping */
+    .shipping-col { font-size:12px; }
+    .shipping-free { color:var(--black); font-weight:600; }
+    .shipping-paid { color:var(--mid); }
+    .shipping-install { color:var(--black); font-weight:600; }
+
+    /* Delivery type badge */
+    .delivery-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:4px 10px; border-radius:100px;
+      font-size:11px; font-weight:600; white-space:nowrap;
     }
+    .delivery-express      { background:var(--black); color:var(--white); }
+    .delivery-installation { background:var(--chip); color:var(--black); border:1px solid var(--black); }
+    .delivery-standard     { background:var(--chip); color:var(--mid); border:1px solid var(--border); }
+    .delivery-slow         { background:var(--chip); color:var(--muted); border:1px solid var(--border); }
 
-    .result-site {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    /* Price */
+    .price-col { text-align:right; }
+    .price-total { font-size:15px; font-weight:700; }
+    .price-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .buy-btn {
+      display:block; height:34px; line-height:32px; padding:0 14px;
+      background:var(--white); color:var(--black); border:1px solid var(--black);
+      border-radius:8px; font-family:var(--font); font-size:12px; font-weight:600;
+      cursor:pointer; text-align:center; text-decoration:none;
+      transition:background .15s,color .15s; white-space:nowrap;
     }
+    .buy-btn:hover { background:var(--black); color:var(--white); }
 
-    .result-name {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text);
-      line-height: 1.4;
-    }
+    /* Empty */
+    .empty-state { padding:80px 0; text-align:center; }
+    .empty-state p { font-size:14px; color:var(--muted); line-height:2; }
 
-    .result-price {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .result-link {
-      text-align: right;
-    }
-
-    .link-btn {
-      display: inline-block;
-      padding: 5px 10px;
-      font-family: 'Pretendard', -apple-system, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-    }
-
-    .link-btn:hover {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-    }
-
-    /* No results within filter */
-    .no-filter-results {
-      padding: 40px 0;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    /* ─── About section ─── */
-    .about-section {
-      display: none;
-      padding: 48px 0;
-    }
-
-    .about-section.active {
-      display: block;
-    }
-
-    .about-section h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-
-    .about-section p {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.8;
-      max-width: 560px;
-      margin-bottom: 12px;
-    }
-
-    /* ─── Mobile ─── */
-    @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-
-      .top-bar {
-        display: flex;
-      }
-
-      .main {
-        margin-left: 0;
-      }
-
-      .content {
-        padding: 24px 20px 60px;
-      }
-
-      .result-row,
-      .result-header {
-        grid-template-columns: 72px 1fr 90px 64px;
-        gap: 10px;
-      }
-
-      .result-name {
-        font-size: 13px;
-      }
-
-      .result-price {
-        font-size: 13px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .result-header {
-        display: none;
-      }
-
-      .result-row {
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
-        gap: 4px 12px;
-        padding: 12px 0;
-      }
-
-      .result-site {
-        grid-column: 1;
-        grid-row: 1;
-        font-size: 11px;
-      }
-
-      .result-name {
-        grid-column: 1;
-        grid-row: 2;
-        font-size: 13px;
-      }
-
-      .result-price {
-        grid-column: 2;
-        grid-row: 1;
-        font-size: 13px;
-        text-align: right;
-      }
-
-      .result-link {
-        grid-column: 2;
-        grid-row: 2;
-        text-align: right;
-      }
+    /* Mobile */
+    .mobile-header { display:none; }
+    @media (max-width:960px) {
+      .sidebar { display:none; }
+      .main { margin-left:0; padding:20px 16px 60px; }
+      .mobile-header { display:flex; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+      .result-row { grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto auto; gap:10px; }
+      .result-row>*:nth-child(1) { grid-column:1; }
+      .result-row>*:nth-child(2) { grid-column:1/-1; }
+      .result-row>*:nth-child(3) { grid-column:1; }
+      .result-row>*:nth-child(4) { grid-column:2; justify-self:end; }
+      .result-row>*:nth-child(5) { grid-column:1; }
+      .result-row>*:nth-child(6) { grid-column:2; justify-self:end; }
+      .buy-btn { width:100%; }
+      .price-col { text-align:left; }
     }
   </style>
 </head>
 <body>
-
 <div class="layout">
 
-  <!-- ─── Sidebar ─── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <h1>Lazyboy</h1>
-      <p>가구 가격 비교</p>
+      <span>가구 가격 비교</span>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="active" data-section="search">검색</a>
-      <a href="#" data-section="about">소개</a>
+      <a class="nav-item active">검색</a>
+      <a class="nav-item">소개</a>
     </nav>
+    <div class="sidebar-footer">
+      <a href="https://github.com/mandogussy/lazyboy" target="_blank">GitHub</a>
+    </div>
   </aside>
 
-  <!-- ─── Mobile top bar ─── -->
-  <header class="top-bar">
-    <span class="top-bar-logo">Lazyboy</span>
-    <nav style="display:flex;gap:16px;">
-      <a href="#" style="font-size:13px;font-weight:500;color:#666;" data-section="search">검색</a>
-      <a href="#" style="font-size:13px;font-weight:500;color:#666;" data-section="about">소개</a>
-    </nav>
-  </header>
-
-  <!-- ─── Main ─── -->
   <main class="main">
+    <div class="mobile-header">
+      <strong style="font-size:17px;font-weight:700;letter-spacing:-0.5px;">Lazyboy</strong>
+    </div>
 
-    <!-- Search section -->
-    <section class="content" id="section-search">
-
-      <div class="search-section">
-        <p class="search-label">가구 검색</p>
-        <div class="search-row">
-          <input
-            type="text"
-            class="search-input"
-            id="searchInput"
-            placeholder="예: 책장, 소파, 식탁..."
-            autocomplete="off"
-          />
-          <button class="search-btn" id="searchBtn">검색</button>
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div class="tabs-row" id="tabsRow">
-        <button class="tab-btn active" data-filter="all">All</button>
-        <button class="tab-btn" data-filter="IKEA">IKEA</button>
-        <button class="tab-btn" data-filter="오늘의집">오늘의집</button>
-        <button class="tab-btn" data-filter="AliExpress">AliExpress</button>
-        <button class="tab-btn" data-filter="Temu">Temu</button>
-      </div>
-
-      <!-- Results -->
-      <div class="results-section">
-
-        <!-- Empty state (shown before search) -->
-        <div class="empty-state" id="emptyState">
-          <p>검색어를 입력하면 IKEA, 오늘의집, AliExpress, Temu 결과를 한 번에 확인할 수 있습니다.</p>
-        </div>
-
-        <!-- Results list (hidden before search) -->
-        <div class="results-list" id="resultsList">
-          <div class="results-meta" id="resultsMeta"></div>
-          <div class="result-header">
-            <span>사이트</span>
-            <span>제품명</span>
-            <span style="text-align:right">가격</span>
-            <span style="text-align:right">링크</span>
-          </div>
-          <div id="resultsBody"></div>
-        </div>
-
+    <section class="hero">
+      <h2>모든 가구를 한번에 비교</h2>
+      <p>IKEA · 오늘의집 · Coupang · 마켓비 · 29CM · MUJI · Desker · AliExpress · Temu · Hanssem</p>
+      <div class="search-row">
+        <input class="search-input" id="searchInput" type="text" placeholder="소파, 책장, 테이블 등 검색어 입력" autocomplete="off" />
+        <button class="search-btn" id="searchBtn">검색하기</button>
       </div>
     </section>
 
-    <!-- About section -->
-    <section class="content about-section" id="section-about">
-      <h2>Lazyboy 소개</h2>
-      <p>Lazyboy는 국내외 주요 가구 플랫폼의 가격을 한 페이지에서 비교할 수 있는 서비스입니다.</p>
-      <p>IKEA, 오늘의집, AliExpress, Temu — 네 곳의 결과를 동시에 조회해 최적의 선택을 도와드립니다.</p>
-      <p>현재 데모 버전으로 운영 중이며, 실제 검색 연동은 준비 중입니다.</p>
+    <section class="filter-section">
+      <div class="filter-label">필터</div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">전체</button>
+        <button class="filter-tab" data-filter="size">공간에 맞게</button>
+        <button class="filter-tab" data-filter="popular">인기순</button>
+        <button class="filter-tab" data-filter="price">가격대</button>
+        <button class="filter-tab" data-filter="delivery_express">로켓 배송</button>
+        <button class="filter-tab" data-filter="delivery_installation">전문 설치</button>
+      </div>
+      <div class="sub-filters" id="sizeFilters">
+        <button class="sub-filter active" data-size="all">전체 사이즈</button>
+        <button class="sub-filter" data-size="600">600mm</button>
+        <button class="sub-filter" data-size="900">900mm</button>
+        <button class="sub-filter" data-size="1000">1000mm</button>
+        <button class="sub-filter" data-size="1200">1200mm</button>
+      </div>
+      <div class="sub-filters" id="priceFilters">
+        <button class="sub-filter active" data-price="all">전체</button>
+        <button class="sub-filter" data-price="30000">3만원 이하</button>
+        <button class="sub-filter" data-price="100000">10만원 이하</button>
+        <button class="sub-filter" data-price="300000">30만원 이하</button>
+        <button class="sub-filter" data-price="500000">50만원 이하</button>
+      </div>
     </section>
 
+    <div class="empty-state" id="emptyState">
+      <p>검색어를 입력하면<br>10개 사이트 결과를 한번에 확인할 수 있습니다</p>
+    </div>
+
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <p>10개 사이트에서 검색 중...</p>
+    </div>
+
+    <section class="results-section" id="resultsSection">
+      <div class="platform-tabs" id="platformTabs">
+        <button class="platform-tab active" data-platform="all">전체</button>
+        <button class="platform-tab" data-platform="IKEA">IKEA</button>
+        <button class="platform-tab" data-platform="오늘의집">오늘의집</button>
+        <button class="platform-tab" data-platform="Coupang">Coupang</button>
+        <button class="platform-tab" data-platform="마켓비">마켓비</button>
+        <button class="platform-tab" data-platform="29CM">29CM</button>
+        <button class="platform-tab" data-platform="MUJI">MUJI</button>
+        <button class="platform-tab" data-platform="Desker">Desker</button>
+        <button class="platform-tab" data-platform="AliExpress">AliExpress</button>
+        <button class="platform-tab" data-platform="Temu">Temu</button>
+        <button class="platform-tab" data-platform="Hanssem">Hanssem</button>
+      </div>
+      <div class="results-meta" id="resultsMeta"></div>
+      <div class="result-list" id="resultList"></div>
+    </section>
   </main>
 </div>
 
 <script>
-  // ─── Mock data ───
-  const MOCK_PRODUCTS = [
-    // IKEA
-    { site: 'IKEA',       name: 'BILLY 책장 80x202cm',              price: 129000 },
-    { site: 'IKEA',       name: 'POÄNG 암체어',                     price: 179000 },
-    { site: 'IKEA',       name: 'LACK 사이드 테이블 55x55cm',        price: 29900  },
-    { site: 'IKEA',       name: 'MALM 침대 프레임 퀸사이즈',          price: 349000 },
-    // 오늘의집
-    { site: '오늘의집',   name: '모던 패브릭 소파 2인용',             price: 389000 },
-    { site: '오늘의집',   name: '원목 식탁 4인용 세트',              price: 520000 },
-    { site: '오늘의집',   name: '북유럽 스타일 독서등',              price: 58000  },
-    { site: '오늘의집',   name: '린넨 커튼 2폭 세트 230cm',          price: 76000  },
-    // AliExpress
-    { site: 'AliExpress', name: 'Minimalist Bookshelf 5-Tier',       price: 42000  },
-    { site: 'AliExpress', name: 'Velvet Accent Chair Grey',          price: 97000  },
-    { site: 'AliExpress', name: 'Folding Study Desk 100cm',          price: 34500  },
-    { site: 'AliExpress', name: 'TV Console Cabinet 120cm Walnut',   price: 89000  },
-    // Temu
-    { site: 'Temu',       name: 'Foldable Storage Ottoman Beige',    price: 21000  },
-    { site: 'Temu',       name: 'Rattan Side Table Round',           price: 18500  },
-    { site: 'Temu',       name: 'Floating Wall Shelves Set of 3',    price: 14900  },
-    { site: 'Temu',       name: 'Linen Throw Pillow Covers 4-Pack',  price: 12800  },
-  ];
+let allData = [];
+let st = { platform:"all", filter:"all", subSize:"all", subPrice:"all" };
 
-  // ─── State ───
-  let currentFilter = 'all';
-  let searchDone = false;
+const fmt  = n => "₩" + n.toLocaleString("ko-KR");
 
-  // ─── Elements ───
-  const searchInput  = document.getElementById('searchInput');
-  const searchBtn    = document.getElementById('searchBtn');
-  const emptyState   = document.getElementById('emptyState');
-  const resultsList  = document.getElementById('resultsList');
-  const resultsMeta  = document.getElementById('resultsMeta');
-  const resultsBody  = document.getElementById('resultsBody');
-  const tabBtns      = document.querySelectorAll('.tab-btn');
+function deliveryBadge(type, days) {
+  if (type === "express")      return [`로켓배송 (${days}일)`, "delivery-express"];
+  if (type === "installation") return ["전문 설치", "delivery-installation"];
+  if (type === "slow")         return [`해외배송 (${days}일)`, "delivery-slow"];
+  return [`${days}일 이내`, "delivery-standard"];
+}
 
-  // ─── Format price ───
-  function formatPrice(n) {
-    return '₩' + n.toLocaleString('ko-KR');
+function shippingDisplay(item) {
+  if (item.delivery_type === "installation") {
+    return `<span class="shipping-install">${item.shipping_label || "전문 설치 포함"}</span>`;
+  }
+  if (item.shipping === 0) {
+    return `<span class="shipping-free">${item.shipping_label || "무료배송"}</span>`;
+  }
+  return `<span class="shipping-paid">${item.shipping_label || fmt(item.shipping)}</span>`;
+}
+
+function filtered() {
+  let d = [...allData];
+  if (st.platform !== "all") d = d.filter(x => x.platform === st.platform);
+
+  if (st.filter === "popular")              d = d.filter(x => x.popular);
+  else if (st.filter === "delivery_express")      d = d.filter(x => x.delivery_type === "express");
+  else if (st.filter === "delivery_installation") d = d.filter(x => x.delivery_type === "installation");
+  else if (st.filter === "size" && st.subSize !== "all") {
+    const v = +st.subSize;
+    d = d.filter(x => x.size > 0 && x.size >= v - 80 && x.size <= v + 80);
+  } else if (st.filter === "price" && st.subPrice !== "all") {
+    const max = +st.subPrice;
+    d = d.filter(x => (x.price + x.shipping) <= max);
   }
 
-  // ─── Render rows ───
-  function renderRows() {
-    if (!searchDone) return;
+  d.sort((a,b) => (a.price + a.shipping) - (b.price + b.shipping));
+  return d;
+}
 
-    const filtered = currentFilter === 'all'
-      ? [...MOCK_PRODUCTS].sort((a, b) => a.price - b.price)
-      : MOCK_PRODUCTS.filter(p => p.site === currentFilter);
+function render() {
+  const data = filtered();
+  const liveCount = data.filter(x => x.live).length;
+  document.getElementById("resultsMeta").innerHTML =
+    `총 <strong>${data.length}개</strong> 결과` +
+    (liveCount > 0 ? `<span class="live-badge">실시간 ${liveCount}개</span>` : "");
 
-    resultsMeta.textContent = filtered.length + '개 결과';
+  const list = document.getElementById("resultList");
+  if (!data.length) {
+    list.innerHTML = `<div style="padding:48px 0;text-align:center;color:#888;font-size:13px;">조건에 맞는 결과가 없습니다</div>`;
+    return;
+  }
 
-    if (filtered.length === 0) {
-      resultsBody.innerHTML = '<div class="no-filter-results">해당 사이트 결과가 없습니다.</div>';
-      return;
-    }
-
-    resultsBody.innerHTML = filtered.map(p => `
-      <div class="result-row">
-        <span class="result-site">${escapeHtml(p.site)}</span>
-        <span class="result-name">${escapeHtml(p.name)}</span>
-        <span class="result-price">${formatPrice(p.price)}</span>
-        <span class="result-link"><a href="#" class="link-btn" onclick="return false;">바로가기</a></span>
+  list.innerHTML = data.map(x => {
+    const [dText, dCls] = deliveryBadge(x.delivery_type, x.days);
+    return `<div class="result-row">
+      <span class="platform-badge${x.live ? " live" : ""}">${x.platform}</span>
+      <div>
+        <div class="product-name">${x.name}</div>
+        <div class="product-sub">${x.size ? x.size + "mm" : ""}${x.popular ? " · 인기" : ""}${x.live ? " · 실시간" : ""}</div>
       </div>
-    `).join('');
+      <div class="shipping-col">${shippingDisplay(x)}</div>
+      <div><span class="delivery-badge ${dCls}">${dText}</span></div>
+      <div class="price-col">
+        <div class="price-total">${fmt(x.price + x.shipping)}</div>
+        <div class="price-sub">상품 ${fmt(x.price)}</div>
+      </div>
+      <div><a class="buy-btn" href="${x.url || "#"}" target="_blank">바로가기</a></div>
+    </div>`;
+  }).join("");
+}
+
+async function doSearch(query) {
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("resultsSection").classList.remove("visible");
+  document.getElementById("loadingState").classList.add("visible");
+  document.getElementById("searchBtn").disabled = true;
+  document.getElementById("searchBtn").textContent = "검색 중...";
+
+  try {
+    const res  = await fetch(`/.netlify/functions/search?q=${encodeURIComponent(query)}`);
+    const json = await res.json();
+    allData = json.results || [];
+  } catch {
+    allData = LOCAL_MOCK;
   }
 
-  // ─── Escape HTML ───
-  function escapeHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  document.getElementById("loadingState").classList.remove("visible");
+  const rs = document.getElementById("resultsSection");
+  rs.classList.remove("visible"); void rs.offsetWidth; rs.classList.add("visible");
+  document.getElementById("searchBtn").disabled = false;
+  document.getElementById("searchBtn").textContent = "검색하기";
+  render();
+}
 
-  // ─── Search ───
-  function doSearch() {
-    const query = searchInput.value.trim();
-    if (!query) {
-      searchInput.focus();
-      searchInput.style.borderColor = '#999';
-      setTimeout(() => { searchInput.style.borderColor = ''; }, 1000);
-      return;
-    }
+// Local fallback mock
+const LOCAL_MOCK = [
+  { platform:"IKEA",      name:"BILLY 책장 80×202cm",         price:129000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:2, size:800,  popular:false, url:"#", live:false },
+  { platform:"IKEA",      name:"KALLAX 선반 유닛 77×77cm",    price:89000,  shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:2, size:770,  popular:true,  url:"#", live:false },
+  { platform:"IKEA",      name:"POANG 암체어",                 price:179000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:2, size:600,  popular:true,  url:"#", live:false },
+  { platform:"IKEA",      name:"LACK 사이드테이블 55cm",       price:35000,  shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:2, size:550,  popular:false, url:"#", live:false },
+  { platform:"오늘의집",  name:"모던 패브릭 소파 2인용",       price:389000, shipping:3000,  shipping_label:"3,000원",             delivery_type:"standard",     days:3, size:1200, popular:true,  url:"#", live:false },
+  { platform:"오늘의집",  name:"원목 커피테이블 900mm",        price:159000, shipping:3000,  shipping_label:"3,000원",             delivery_type:"standard",     days:3, size:900,  popular:true,  url:"#", live:false },
+  { platform:"Coupang",   name:"조립식 책장 5단 600mm",        price:39900,  shipping:0,     shipping_label:"무료배송 (로켓)",      delivery_type:"express",      days:1, size:600,  popular:true,  url:"#", live:false },
+  { platform:"Coupang",   name:"1인 소파베드",                 price:89000,  shipping:0,     shipping_label:"무료배송 (로켓)",      delivery_type:"express",      days:1, size:900,  popular:true,  url:"#", live:false },
+  { platform:"마켓비",    name:"피노 원목 책상 1200",          price:129000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:4, size:1200, popular:true,  url:"#", live:false },
+  { platform:"마켓비",    name:"벨로 3단 사이드테이블",        price:49000,  shipping:3000,  shipping_label:"3,000원",             delivery_type:"standard",     days:3, size:400,  popular:true,  url:"#", live:false },
+  { platform:"29CM",      name:"프레임 월넛 사이드보드 1200",  price:890000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:5, size:1200, popular:true,  url:"#", live:false },
+  { platform:"29CM",      name:"루이스 폴센 PH5 펜던트",       price:520000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:4, size:500,  popular:true,  url:"#", live:false },
+  { platform:"MUJI",      name:"무인양품 스틸 유닛 선반 88cm", price:159000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:3, size:880,  popular:true,  url:"#", live:false },
+  { platform:"MUJI",      name:"비치 원목 낮은 테이블 120",    price:189000, shipping:0,     shipping_label:"무료배송",            delivery_type:"standard",     days:4, size:1200, popular:false, url:"#", live:false },
+  { platform:"Desker",    name:"DSDR-150 모션데스크 150cm",    price:649000, shipping:0,     shipping_label:"무료 전문 설치",       delivery_type:"installation", days:7, size:1500, popular:true,  url:"#", live:false },
+  { platform:"Desker",    name:"DCCR-100 링크 책상 100cm",     price:289000, shipping:0,     shipping_label:"무료 전문 설치",       delivery_type:"installation", days:7, size:1000, popular:true,  url:"#", live:false },
+  { platform:"AliExpress",name:"Nordic Shelf Unit 800mm",     price:18500,  shipping:0,     shipping_label:"무료배송",            delivery_type:"slow",         days:10,size:800,  popular:false, url:"#", live:false },
+  { platform:"Temu",      name:"접이식 수납 선반",             price:8900,   shipping:0,     shipping_label:"무료배송",            delivery_type:"slow",         days:7, size:600,  popular:false, url:"#", live:false },
+  { platform:"Hanssem",   name:"에뚜알 4단 책장 900",          price:285000, shipping:30000, shipping_label:"30,000원 (설치포함)", delivery_type:"installation", days:5, size:900,  popular:true,  url:"#", live:false },
+  { platform:"Hanssem",   name:"리베 패브릭 3인 소파",         price:890000, shipping:0,     shipping_label:"무료 전문 설치",       delivery_type:"installation", days:7, size:1200, popular:true,  url:"#", live:false },
+];
 
-    searchDone = true;
-    emptyState.style.display = 'none';
-    resultsList.classList.add('visible');
-    renderRows();
-  }
-
-  searchBtn.addEventListener('click', doSearch);
-  searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch();
-  });
-
-  // ─── Tabs ───
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      if (searchDone) renderRows();
-    });
-  });
-
-  // ─── Nav (sidebar + mobile) ───
-  const sectionSearch = document.getElementById('section-search');
-  const sectionAbout  = document.getElementById('section-about');
-  const allNavLinks   = document.querySelectorAll('[data-section]');
-
-  allNavLinks.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const target = link.dataset.section;
-
-      // Update active state in sidebar
-      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-      document.querySelectorAll('.sidebar-nav a[data-section="' + target + '"]').forEach(a => a.classList.add('active'));
-
-      if (target === 'search') {
-        sectionSearch.style.display = '';
-        sectionAbout.classList.remove('active');
-      } else {
-        sectionSearch.style.display = 'none';
-        sectionAbout.classList.add('active');
-      }
-    });
-  });
+// Events
+document.getElementById("searchBtn").addEventListener("click", () => {
+  const q = document.getElementById("searchInput").value.trim();
+  if (!q) { document.getElementById("searchInput").focus(); return; }
+  doSearch(q);
+});
+document.getElementById("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") document.getElementById("searchBtn").click();
+});
+document.querySelectorAll(".filter-tab").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filter-tab").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); st.filter = b.dataset.filter;
+  document.getElementById("sizeFilters").classList.toggle("visible", st.filter === "size");
+  document.getElementById("priceFilters").classList.toggle("visible", st.filter === "price");
+  render();
+}));
+document.querySelectorAll("#sizeFilters .sub-filter").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#sizeFilters .sub-filter").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); st.subSize = b.dataset.size; render();
+}));
+document.querySelectorAll("#priceFilters .sub-filter").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#priceFilters .sub-filter").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); st.subPrice = b.dataset.price; render();
+}));
+document.querySelectorAll(".platform-tab").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".platform-tab").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); st.platform = b.dataset.platform; render();
+}));
 </script>
 </body>
 </html>
